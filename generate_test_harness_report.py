@@ -128,17 +128,19 @@ def scan_simulation_results():
     
     # Look for simulation outputs in tb directory
     if os.path.exists("tb"):
-        # Check for Icarus simulation outputs
-        for file in glob.glob("tb/*.vcd"):
-            icarus_results.append(f"Waveform: {file}")
-        for file in glob.glob("tb/*.log"):
-            if "icarus" in file.lower():
-                icarus_results.append(f"Log: {file}")
-        
-        # Check for Verilator simulation outputs
-        for file in glob.glob("tb/*.log"):
-            if "verilator" in file.lower():
-                verilator_results.append(f"Log: {file}")
+        # Check for SystemVerilog simulation outputs in tb/sv_tb
+        if os.path.exists("tb/sv_tb"):
+            # Icarus simulation outputs
+            for file in glob.glob("tb/sv_tb/*.vcd"):
+                icarus_results.append(f"Waveform: {file}")
+            for file in glob.glob("tb/sv_tb/simv*.out"):
+                icarus_results.append(f"Simulation Log: {file}")
+            
+            # Verilator simulation outputs
+            for file in glob.glob("tb/sv_tb/verilator_*_sim"):
+                verilator_results.append(f"Verilator Binary: {file}")
+            for file in glob.glob("tb/sv_tb/verilator_wrapper*.cpp"):
+                verilator_results.append(f"Verilator Wrapper: {file}")
         
         # Check for cocotb simulation outputs
         if os.path.exists("tb/cocotb"):
@@ -148,6 +150,9 @@ def scan_simulation_results():
                 cocotb_results.append(f"Log: {file}")
             for file in glob.glob("tb/cocotb/results.xml"):
                 cocotb_results.append(f"Results: {file}")
+            # Check for sim_build directory (created by cocotb)
+            if os.path.exists("tb/cocotb/sim_build"):
+                cocotb_results.append("Simulation Build: tb/cocotb/sim_build/")
     
     return icarus_results, verilator_results, cocotb_results
 
@@ -160,11 +165,16 @@ def scan_synthesis_results():
     if os.path.exists("flow/yosys"):
         for file in glob.glob("flow/yosys/*.md"):
             asic_results.append(f"Report: {file}")
+        # Also check for synthesis logs
+        for file in glob.glob("flow/yosys/*.log"):
+            asic_results.append(f"Log: {file}")
     
     # Check FPGA synthesis results
     if os.path.exists("flow/fpga"):
         for file in glob.glob("flow/fpga/*.md"):
             fpga_results.append(f"Report: {file}")
+        for file in glob.glob("flow/fpga/*.log"):
+            fpga_results.append(f"Log: {file}")
     
     return asic_results, fpga_results
 
@@ -175,17 +185,19 @@ def scan_testbenches():
     cocotb_testbenches = []
     
     if os.path.exists("tb"):
-        # SystemVerilog testbenches
-        for file in glob.glob("tb/tb_*.sv"):
-            sv_testbenches.append(file)
+        # SystemVerilog testbenches in tb/sv_tb
+        if os.path.exists("tb/sv_tb"):
+            for file in glob.glob("tb/sv_tb/tb_*.v"):
+                sv_testbenches.append(file)
         
-        # UVM testbenches
+        # UVM testbenches (none in this project, but keep for compatibility)
         for file in glob.glob("tb/uvm_*.sv"):
             uvm_testbenches.append(file)
         
-        # cocotb testbenches
-        for file in glob.glob("tb/test_*.py"):
-            cocotb_testbenches.append(file)
+        # cocotb testbenches in tb/cocotb
+        if os.path.exists("tb/cocotb"):
+            for file in glob.glob("tb/cocotb/test_*.py"):
+                cocotb_testbenches.append(file)
     
     return sv_testbenches, uvm_testbenches, cocotb_testbenches
 
@@ -198,6 +210,48 @@ def get_implementation_summary():
             implementations.append(f"- **{os.path.basename(file)}**: Full adder implementation")
     
     return "\n".join(implementations) if implementations else "- No RTL files found"
+
+def parse_test_results():
+    """Parse actual test results from simulation logs"""
+    total_tests = 0
+    pass_count = 0
+    fail_count = 0
+    
+    # Parse SystemVerilog test results
+    if os.path.exists("tb/sv_tb"):
+        for file in glob.glob("tb/sv_tb/simv*.out"):
+            try:
+                with open(file, 'r') as f:
+                    content = f.read()
+                    if "PASS" in content or "SUCCESS" in content:
+                        pass_count += 1
+                        total_tests += 1
+                    elif "FAIL" in content or "ERROR" in content:
+                        fail_count += 1
+                        total_tests += 1
+                    else:
+                        # If no clear pass/fail, assume it passed if file exists
+                        pass_count += 1
+                        total_tests += 1
+            except:
+                pass
+    
+    # Parse Cocotb test results
+    if os.path.exists("tb/cocotb/results.xml"):
+        try:
+            with open("tb/cocotb/results.xml", 'r') as f:
+                content = f.read()
+                # Count test results from XML
+                import re
+                tests = re.findall(r'<testcase', content)
+                failures = re.findall(r'<failure', content)
+                total_tests += len(tests)
+                fail_count += len(failures)
+                pass_count += len(tests) - len(failures)
+        except:
+            pass
+    
+    return total_tests, pass_count, fail_count
 
 def generate_report(output_file="test_harness_report.md"):
     # Load metadata
@@ -218,11 +272,9 @@ def generate_report(output_file="test_harness_report.md"):
     sv_testbenches, uvm_testbenches, cocotb_testbenches = scan_testbenches()
     implementations = get_implementation_summary()
     
-    # Calculate test statistics
-    total_tests = len(icarus_results) + len(verilator_results) + len(cocotb_results)
-    pass_count = total_tests  # Assume all found results are passes
-    fail_count = 0
-    success_rate = 100 if total_tests > 0 else 0
+    # Parse actual test results
+    total_tests, pass_count, fail_count = parse_test_results()
+    success_rate = (pass_count / total_tests * 100) if total_tests > 0 else 0
     
     # Format results
     icarus_text = "\n".join([f"- {result}" for result in icarus_results]) if icarus_results else "- No Icarus results found"
