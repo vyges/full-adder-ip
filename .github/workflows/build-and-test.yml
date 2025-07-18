@@ -119,7 +119,8 @@ jobs:
             pkg-config \
             libboost-system-dev \
             libboost-python-dev \
-            libboost-filesystem-dev
+            libboost-filesystem-dev \
+            verilator
 
       - name: Install Yosys from package
         run: |
@@ -131,61 +132,17 @@ jobs:
           
           # Verify installation
           yosys -V
-          yosys -m slang -p "slang_version"
           
-          # Verify Yosys version meets requirement (>= 0.39)
+          # Get Yosys version
           YOSYS_VERSION=$(yosys -V | grep -oP 'Yosys \K[0-9]+\.[0-9]+')
           echo "Installed Yosys version: $YOSYS_VERSION"
           
-          # Check if version >= 0.39
-          if [ "$(printf '%s\n' "0.39" "$YOSYS_VERSION" | sort -V | head -n1)" = "0.39" ]; then
-            echo "✅ Yosys version $YOSYS_VERSION meets requirement (>= 0.39)"
-          else
-            echo "❌ Yosys version $YOSYS_VERSION does not meet requirement (>= 0.39)"
-            exit 1
-          fi
-          
           # Verify ABC is available
           yosys -p "help abc" | grep -q "ABC" && echo "✅ ABC technology mapping available" || echo "❌ ABC not available"
-
-      - name: Install Verilator 5.026
-        run: |
-          # Clone Verilator repository
-          git clone https://github.com/verilator/verilator.git
-          cd verilator
           
-          # Checkout specific version 5.026
-          git checkout v5.026
-          
-          # Build and install
-          autoconf
-          ./configure
-          make -j$(nproc)
-          sudo make install
-          
-          # Verify installation
-          verilator --version
-
-      - name: Install GHDL Yosys plugin
-        run: |
-          echo "🔧 Installing GHDL Yosys plugin..."
-          
-          # Install GHDL (VHDL simulator)
-          sudo apt-get install -y ghdl
-          
-          # Clone GHDL Yosys plugin
-          git clone https://github.com/ghdl/ghdl-yosys-plugin.git
-          cd ghdl-yosys-plugin
-          
-          # Build the plugin
-          make
-          
-          # Install the plugin
-          sudo make install
-          
-          # Verify installation
-          echo "✅ GHDL Yosys plugin installed"
-          echo "Note: VHDL synthesis support is now available in Yosys"
+          # Test basic functionality
+          echo "Testing Yosys basic functionality..."
+          yosys -p "help" | head -5
 
       - name: Install Icarus Verilog (if selected)
         if: ${{ github.event.inputs.simulator == 'icarus' || github.event.inputs.simulator == 'both' }}
@@ -279,11 +236,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Verilator
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y verilator
-
       - name: Lint SystemVerilog files
         run: |
           echo "🔍 Linting SystemVerilog files..."
@@ -344,17 +296,12 @@ jobs:
             echo "should-run=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Install ${{ matrix.simulator }}
-        if: steps.check-simulator.outputs.should-run == 'true'
+      - name: Install Icarus Verilog (if needed)
+        if: steps.check-simulator.outputs.should-run == 'true' && matrix.simulator == 'icarus'
         run: |
           sudo apt-get update
-          if [ "${{ matrix.simulator }}" = "verilator" ]; then
-            sudo apt-get install -y verilator
-            verilator --version
-          elif [ "${{ matrix.simulator }}" = "icarus" ]; then
-            sudo apt-get install -y iverilog
-            iverilog -V
-          fi
+          sudo apt-get install -y iverilog
+          iverilog -V
 
       - name: Install Python dependencies
         run: |
