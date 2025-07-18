@@ -432,14 +432,83 @@ jobs:
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && (github.event.inputs.test_synthesis == 'true' || github.event_name != 'workflow_dispatch')
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          publish_dir: ./public
-          publish_branch: gh-pages
-          force_orphan: true
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          enable_jekyll: false
-          cname: '' 
+        run: |
+          echo "🚀 Deploying synthesis reports to GitHub Pages..."
+          
+          # Create index.html for GitHub Pages
+          cat > public/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Full Adder IP - Synthesis Reports</title>
+              <style>
+                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+                  h1 { color: #0366d6; border-bottom: 1px solid #e1e4e8; padding-bottom: 10px; }
+                  h2 { color: #24292e; margin-top: 30px; }
+                  .report-section { background: #f6f8fa; padding: 20px; border-radius: 6px; margin: 20px 0; }
+                  .report-link { display: inline-block; background: #0366d6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin: 10px 5px; }
+                  .report-link:hover { background: #0256cc; }
+                  .timestamp { color: #586069; font-size: 14px; }
+              </style>
+          </head>
+          <body>
+              <h1>🔧 Full Adder IP - Synthesis Reports</h1>
+              <p class="timestamp">Generated: $(date -u)</p>
+              
+              <div class="report-section">
+                  <h2>📊 ASIC Synthesis Reports</h2>
+                  <p>Comprehensive analysis of ASIC implementations including gate counts, transistor analysis, and synthesis results.</p>
+                  <a href="./asic/comprehensive_report.md" class="report-link">📋 Comprehensive Report</a>
+                  <a href="./asic/gate_analysis_report.md" class="report-link">🔢 Gate Analysis</a>
+                  <a href="./asic/synthesis_report.md" class="report-link">⚡ Synthesis Report</a>
+              </div>
+              
+              <div class="report-section">
+                  <h2>🔌 FPGA Synthesis Reports</h2>
+                  <p>FPGA resource utilization analysis and synthesis results for Xilinx 7-series devices.</p>
+                  <a href="./fpga/comprehensive_fpga_report.md" class="report-link">📋 Comprehensive Report</a>
+                  <a href="./fpga/fpga_resource_analysis_report.md" class="report-link">🔢 Resource Analysis</a>
+              </div>
+              
+              <div class="report-section">
+                  <h2>📈 Implementation Summary</h2>
+                  <ul>
+                      <li><strong>Carry Lookahead:</strong> 5 gates, 32 transistors</li>
+                      <li><strong>Simple XOR/AND:</strong> 5 gates, 32 transistors</li>
+                      <li><strong>Half Adder:</strong> 7 gates, 48 transistors</li>
+                  </ul>
+              </div>
+          </body>
+          </html>
+          EOF
+          
+          # Configure git for deployment
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create or update gh-pages branch
+          if git ls-remote --heads origin gh-pages | grep gh-pages; then
+            echo "gh-pages branch exists, updating..."
+            git fetch origin gh-pages
+            git checkout gh-pages
+            git pull origin gh-pages
+          else
+            echo "Creating new gh-pages branch..."
+            git checkout --orphan gh-pages
+          fi
+          
+          # Remove all existing files and copy new ones
+          git rm -rf . || true
+          cp -r public/* .
+          
+          # Commit and push
+          git add .
+          git commit -m "Update synthesis reports - $(date -u)" || echo "No changes to commit"
+          git push origin gh-pages
+          
+          echo "✅ GitHub Pages deployment complete!"
+          echo "📖 Reports available at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" 
 
  
