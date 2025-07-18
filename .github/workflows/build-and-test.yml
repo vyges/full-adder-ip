@@ -121,18 +121,13 @@ jobs:
             libboost-python-dev \
             libboost-filesystem-dev
 
-      - name: Install Yosys from source
+      - name: Install Yosys from package
         run: |
-          echo "🔧 Installing Yosys from source..."
+          echo "🔧 Installing Yosys from package..."
           
-          # Clone Yosys repository
-          git clone https://github.com/YosysHQ/yosys.git
-          cd yosys
-          
-          # Build and install Yosys
-          make config-gcc
-          make -j$(nproc)
-          sudo make install
+          # Install Yosys from Ubuntu package manager
+          sudo apt-get update
+          sudo apt-get install -y yosys
           
           # Verify installation
           yosys -V
@@ -152,8 +147,6 @@ jobs:
           
           # Verify ABC is available
           yosys -p "help abc" | grep -q "ABC" && echo "✅ ABC technology mapping available" || echo "❌ ABC not available"
-          
-          cd ..
 
       - name: Install Verilator 5.026
         run: |
