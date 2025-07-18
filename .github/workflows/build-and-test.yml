@@ -464,11 +464,22 @@ jobs:
         if: always()
         run: |
           echo "📊 Generating comprehensive test harness report..."
+          
+          # Create standard footer for all HTML pages first
+          mkdir -p public
+          cat > public/vyges-footer.html << 'EOF'
+          <div class="vyges-footer">
+              <p>This report was automatically generated.</p>
+              <p>Copyright (c) 2025 Vyges, Inc. All rights reserved.</p>
+              <p>Powered by Vyges - Build Silicon Like Software</p>
+              <p><strong>Build IP Not Boilerplate</strong></p>
+          </div>
+          EOF
+          
           python3 generate_test_harness_report.py
           
           # Copy report to public directory for GitHub Pages
           if [ -f "test_harness_report.md" ]; then
-            mkdir -p public
             cp test_harness_report.md public/
             echo "✅ Test harness report generated and copied to public directory"
           
@@ -566,15 +577,7 @@ jobs:
           </style>
           EOF
           
-          # Create standard footer for all HTML pages
-          cat > public/vyges-footer.html << 'EOF'
-          <div class="vyges-footer">
-              <p>This report was automatically generated.</p>
-              <p>Copyright © 2025 Vyges, Inc. All rights reserved.</p>
-              <p>Powered by Vyges - Build Silicon Like Software</p>
-              <p><strong>Build IP Not Boilerplate</strong></p>
-          </div>
-          EOF
+
           
           # Convert test harness report to HTML
           if [ -f "test_harness_report.md" ]; then
@@ -605,8 +608,6 @@ jobs:
           fi
           
           echo "✅ All markdown reports converted to HTML"
-          else
-            echo "⚠️ Test harness report generation failed"
           fi
 
       # Deploy to GitHub Pages
