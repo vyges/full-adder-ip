@@ -17,28 +17,31 @@ TOPLEVEL ?= full_adder
 # Python test file (can be overridden)
 MODULE ?= test_full_adder
 
+# RTL directory
+RTL_DIR = $(PWD)/../../rtl
+
 # Include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
 # Additional simulator-specific settings
 ifeq ($(SIM),icarus)
     # Icarus Verilog settings
-    COMPILE_ARGS += -I $(PWD)/../../rtl
-    VERILOG_SOURCES += $(PWD)/../../rtl/$(TOPLEVEL).v
+    COMPILE_ARGS += -I $(RTL_DIR)
+    VERILOG_SOURCES += $(RTL_DIR)/$(TOPLEVEL).v
 else ifeq ($(SIM),verilator)
     # Verilator settings
-    COMPILE_ARGS += -I $(PWD)/../../rtl
-    VERILOG_SOURCES += $(PWD)/../../rtl/$(TOPLEVEL).v
+    COMPILE_ARGS += -I $(RTL_DIR)
+    VERILOG_SOURCES += $(RTL_DIR)/$(TOPLEVEL).v
     EXTRA_ARGS += --trace --trace-structs
 else ifeq ($(SIM),questa)
     # Questa/ModelSim settings
-    COMPILE_ARGS += -I $(PWD)/../../rtl
-    VERILOG_SOURCES += $(PWD)/../../rtl/$(TOPLEVEL).v
+    COMPILE_ARGS += -I $(RTL_DIR)
+    VERILOG_SOURCES += $(RTL_DIR)/$(TOPLEVEL).v
     EXTRA_ARGS += -do "run -all; quit"
 else ifeq ($(SIM),vcs)
     # VCS settings
-    COMPILE_ARGS += -I $(PWD)/../../rtl
-    VERILOG_SOURCES += $(PWD)/../../rtl/$(TOPLEVEL).v
+    COMPILE_ARGS += -I $(RTL_DIR)
+    VERILOG_SOURCES += $(RTL_DIR)/$(TOPLEVEL).v
     EXTRA_ARGS += -full64
 endif
 
