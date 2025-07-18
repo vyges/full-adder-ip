@@ -95,17 +95,11 @@ jobs:
             libfl-dev \
             libfl2 \
             libgit2-dev \
+            libunwind-dev \
             libgoogle-perftools-dev \
-            libqt5multimediawidgets5 \
-            libqt5opengl5 \
             libqt5svg5-dev \
-            libqt5xmlpatterns5-dev \
             libz-dev \
             perl \
-            qtmultimedia5-dev \
-            qttools5-dev \
-            ruby \
-            ruby-dev \
             time \
             zlib1g \
             zlib1g-dev \
