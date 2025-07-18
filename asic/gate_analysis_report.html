@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Full Adder IP - gate_analysis_report</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../report-style.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Full Adder IP - gate_analysis_report</h1>
+</header>
+<h1 id="full-adder-gate-level-analysis-report"># Full Adder Gate-Level
+Analysis Report</h1>
+<h2 id="gate-count-summary">Gate Count Summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Implementation</th>
+<th>Primitive Gates</th>
+<th>Transistors</th>
+<th>Design Style</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Carry Lookahead</td>
+<td>5</td>
+<td>32</td>
+<td>Flat</td>
+</tr>
+<tr class="even">
+<td>Simple XOR/AND</td>
+<td>5</td>
+<td>32</td>
+<td>Flat</td>
+</tr>
+<tr class="odd">
+<td>Half Adder</td>
+<td>7</td>
+<td>48</td>
+<td>Hierarchical</td>
+</tr>
+</tbody>
+</table>
+<h2 id="carry-lookahead-implementation">Carry Lookahead
+Implementation</h2>
+<h3 id="gate-breakdown">Gate Breakdown</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Gate Type</th>
+<th>Count</th>
+<th>Transistors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AND</td>
+<td>1</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td>ANDNOT</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td>OR</td>
+<td>1</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td>XNOR</td>
+<td>2</td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+<h3 id="module-instances">Module Instances</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Instances</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>AND</em></td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><em>XNOR</em></td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><em>ANDNOT</em></td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><em>OR</em></td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="total-statistics">Total Statistics</h3>
+<ul>
+<li><strong>Primitive Gates</strong>: 5</li>
+<li><strong>Estimated Transistors</strong>: 32</li>
+<li><strong>Design Style</strong>: Flat</li>
+</ul>
+<h3 id="logic-complexity-analysis">Logic Complexity Analysis</h3>
+<ul>
+<li><strong>Carry Generation</strong>: Optimized carry lookahead
+logic</li>
+<li><strong>Sum Generation</strong>: XNOR-based sum calculation</li>
+<li><strong>Advantage</strong>: Fast carry propagation</li>
+</ul>
+<h2 id="simple-xorand-implementation">Simple XOR/AND Implementation</h2>
+<h3 id="gate-breakdown-1">Gate Breakdown</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Gate Type</th>
+<th>Count</th>
+<th>Transistors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AND</td>
+<td>1</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td>ANDNOT</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td>OR</td>
+<td>1</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td>XNOR</td>
+<td>2</td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+<h3 id="module-instances-1">Module Instances</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Instances</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>XNOR</em></td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td><em>AND</em></td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td><em>ANDNOT</em></td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><em>OR</em></td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="total-statistics-1">Total Statistics</h3>
+<ul>
+<li><strong>Primitive Gates</strong>: 5</li>
+<li><strong>Estimated Transistors</strong>: 32</li>
+<li><strong>Design Style</strong>: Flat</li>
+</ul>
+<h3 id="logic-complexity-analysis-1">Logic Complexity Analysis</h3>
+<ul>
+<li><strong>Carry Generation</strong>: Standard AND-OR logic</li>
+<li><strong>Sum Generation</strong>: Cascaded XNOR gates</li>
+<li><strong>Advantage</strong>: Simple and straightforward</li>
+</ul>
+<h2 id="half-adder-implementation">Half Adder Implementation</h2>
+<h3 id="gate-breakdown-2">Gate Breakdown</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Gate Type</th>
+<th>Count</th>
+<th>Transistors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AND</td>
+<td>1</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td>OR</td>
+<td>1</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td>XOR</td>
+<td>1</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<h3 id="module-instances-2">Module Instances</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Instances</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>OR</em></td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>half_adder</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><em>XOR</em></td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><em>AND</em></td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="total-statistics-2">Total Statistics</h3>
+<ul>
+<li><strong>Primitive Gates</strong>: 7</li>
+<li><strong>Estimated Transistors</strong>: 48</li>
+<li><strong>Design Style</strong>: Hierarchical</li>
+</ul>
+<h3 id="logic-complexity-analysis-2">Logic Complexity Analysis</h3>
+<ul>
+<li><strong>Carry Generation</strong>: Two half-adder instances + OR
+gate</li>
+<li><strong>Sum Generation</strong>: Cascaded half-adder sum
+outputs</li>
+<li><strong>Advantage</strong>: Modular and reusable design</li>
+</ul>
+<h2 id="performance-comparison">Performance Comparison</h2>
+<h3 id="area-efficiency">Area Efficiency</h3>
+<ol type="1">
+<li><strong>Half Adder Implementation</strong>: Most modular, reusable
+components</li>
+<li><strong>Simple XOR/AND</strong>: Standard implementation, good
+balance</li>
+<li><strong>Carry Lookahead</strong>: Optimized for speed, similar
+area</li>
+</ol>
+<h3 id="design-trade-offs">Design Trade-offs</h3>
+<ul>
+<li><strong>Area</strong>: All implementations use similar transistor
+counts (~40-48)</li>
+<li><strong>Speed</strong>: Carry lookahead optimized for fast carry
+propagation</li>
+<li><strong>Modularity</strong>: Half adder implementation most
+modular</li>
+<li><strong>Complexity</strong>: Simple XOR/AND easiest to
+understand</li>
+</ul>
+<h2 id="technology-considerations">Technology Considerations</h2>
+<h3 id="standard-cell-mapping">Standard Cell Mapping</h3>
+<p>All implementations map to standard cell library: - AND, OR, XOR,
+XNOR gates - AND-NOT gates for optimized logic - Compatible with most
+CMOS processes</p>
+<h3 id="power-considerations">Power Considerations</h3>
+<ul>
+<li><strong>Static Power</strong>: Minimal (combinational logic)</li>
+<li><strong>Dynamic Power</strong>: Proportional to switching
+activity</li>
+<li><strong>Clock Power</strong>: Only for clock/reset signals
+(minimal)</li>
+</ul>
+</body>
+</html>

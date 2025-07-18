@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Full Adder IP - fpga_resource_analysis_report</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../report-style.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Full Adder IP - fpga_resource_analysis_report</h1>
+</header>
+<h1 id="fpga-resource-analysis-report">FPGA Resource Analysis
+Report</h1>
+<h2 id="summary">Summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Implementation</th>
+<th>Estimated LUTs</th>
+<th>Gate Count</th>
+<th>Design Style</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Carry Lookahead</td>
+<td>5</td>
+<td>5</td>
+<td>Flat</td>
+</tr>
+<tr class="even">
+<td>Simple</td>
+<td>5</td>
+<td>5</td>
+<td>Flat</td>
+</tr>
+<tr class="odd">
+<td>Half Adder</td>
+<td>7</td>
+<td>3</td>
+<td>Hierarchical</td>
+</tr>
+</tbody>
+</table>
+<h2 id="detailed-analysis">Detailed Analysis</h2>
+<h3 id="carry-lookahead-implementation">Carry Lookahead
+Implementation</h3>
+<p><strong>File</strong>:
+<code>full_adder_carry_lookahead_fpga.v</code></p>
+<p><strong>Gate Breakdown:</strong> - AND: 1 - OR: 1 - XNOR: 2 - ANDNOT:
+1</p>
+<p><strong>LUT Estimation:</strong> - <strong>Estimated LUTs</strong>:
+5</p>
+<hr />
+<h3 id="simple-implementation">Simple Implementation</h3>
+<p><strong>File</strong>: <code>full_adder_simple_fpga.v</code></p>
+<p><strong>Gate Breakdown:</strong> - AND: 1 - OR: 1 - XNOR: 2 - ANDNOT:
+1</p>
+<p><strong>LUT Estimation:</strong> - <strong>Estimated LUTs</strong>:
+5</p>
+<hr />
+<h3 id="half-adder-implementation">Half Adder Implementation</h3>
+<p><strong>File</strong>: <code>full_adder_half_adder_fpga.v</code></p>
+<p><strong>Gate Breakdown:</strong> - AND: 1 - OR: 1 - XOR: 1</p>
+<p><strong>Module Instances:</strong> - half_adder: 2</p>
+<p><strong>LUT Estimation:</strong> - <strong>Estimated LUTs</strong>:
+7</p>
+<hr />
+<h2 id="fpga-implementation-notes">FPGA Implementation Notes</h2>
+<h3 id="xilinx-7-series-artix-7-kintex-7-virtex-7">Xilinx 7-series
+(Artix-7, Kintex-7, Virtex-7)</h3>
+<ul>
+<li><strong>LUT Type</strong>: 6-input LUTs</li>
+<li><strong>LUT Configuration</strong>: Each LUT can implement any
+6-input Boolean function</li>
+<li><strong>Carry Chain</strong>: Dedicated carry logic for arithmetic
+operations</li>
+<li><strong>DSP Slices</strong>: Available for complex arithmetic (not
+used in full adder)</li>
+</ul>
+<h3 id="resource-utilization">Resource Utilization</h3>
+<ul>
+<li><strong>Logic Cells</strong>: Each LUT + associated flip-flop</li>
+<li><strong>Slice</strong>: Contains 4 LUTs and 8 flip-flops</li>
+<li><strong>CLB</strong>: Contains 2 slices</li>
+</ul>
+<h3 id="performance-characteristics">Performance Characteristics</h3>
+<ul>
+<li><strong>LUT Delay</strong>: ~0.5ns per LUT</li>
+<li><strong>Carry Chain Delay</strong>: ~0.1ns per bit</li>
+<li><strong>Maximum Frequency</strong>: 500+ MHz achievable</li>
+</ul>
+</body>
+</html>

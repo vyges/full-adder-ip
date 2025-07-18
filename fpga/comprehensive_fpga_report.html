@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Full Adder IP - comprehensive_fpga_report</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../report-style.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Full Adder IP - comprehensive_fpga_report</h1>
+</header>
+<h1 id="full-adder-fpga-synthesis-comprehensive-report">Full Adder FPGA
+Synthesis Comprehensive Report</h1>
+<p>Generated: Fri Jul 18 07:54:19 UTC 2025</p>
+<h2 id="fpga-resource-analysis">FPGA Resource Analysis</h2>
+<h1 id="fpga-resource-analysis-report">FPGA Resource Analysis
+Report</h1>
+<h2 id="summary">Summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Implementation</th>
+<th>Total LUTs</th>
+<th>Flip-Flops</th>
+<th>Design Style</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Carry Lookahead</td>
+<td>0</td>
+<td>0</td>
+<td>Hierarchical</td>
+</tr>
+<tr class="even">
+<td>Simple</td>
+<td>0</td>
+<td>0</td>
+<td>Hierarchical</td>
+</tr>
+<tr class="odd">
+<td>Half Adder</td>
+<td>0</td>
+<td>0</td>
+<td>Hierarchical</td>
+</tr>
+</tbody>
+</table>
+<h2 id="detailed-analysis">Detailed Analysis</h2>
+<h3 id="carry-lookahead-implementation">Carry Lookahead
+Implementation</h3>
+<p><strong>File</strong>:
+<code>full_adder_carry_lookahead_fpga.v</code></p>
+<p><strong>LUT Utilization:</strong> - <strong>Total LUTs</strong>:
+0</p>
+<p><strong>Other Resources:</strong></p>
+<p><strong>Module Instances:</strong> - <em>AND</em>: 1 - <em>XNOR</em>:
+2 - <em>ANDNOT</em>: 1 - <em>OR</em>: 1</p>
+<hr />
+<h3 id="simple-implementation">Simple Implementation</h3>
+<p><strong>File</strong>: <code>full_adder_simple_fpga.v</code></p>
+<p><strong>LUT Utilization:</strong> - <strong>Total LUTs</strong>:
+0</p>
+<p><strong>Other Resources:</strong></p>
+<p><strong>Module Instances:</strong> - <em>XNOR</em>: 2 - <em>AND</em>:
+1 - <em>ANDNOT</em>: 1 - <em>OR</em>: 1</p>
+<hr />
+<h3 id="half-adder-implementation">Half Adder Implementation</h3>
+<p><strong>File</strong>: <code>full_adder_half_adder_fpga.v</code></p>
+<p><strong>LUT Utilization:</strong> - <strong>Total LUTs</strong>:
+0</p>
+<p><strong>Other Resources:</strong></p>
+<p><strong>Module Instances:</strong> - <em>OR</em>: 1 - half_adder: 2 -
+<em>XOR</em>: 1 - <em>AND</em>: 1</p>
+<hr />
+<h2 id="synthesis-statistics">Synthesis Statistics</h2>
+<h3 id="carry-lookahead-implementation-1">Carry Lookahead
+Implementation</h3>
+<pre><code>
+12. Printing statistics.
+
+=== full_adder ===
+
+   Number of wires:                 10
+   Number of wire bits:             10
+   Number of public wires:           7
+   Number of public wire bits:       7
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                  5
+     $_ANDNOT_                       1
+     $_AND_                          1
+     $_OR_                           1
+     $_XNOR_                         2
+</code></pre>
+<h3 id="simple-implementation-1">Simple Implementation</h3>
+<pre><code>
+12. Printing statistics.
+
+=== full_adder_simple ===
+
+   Number of wires:                 10
+   Number of wire bits:             10
+   Number of public wires:           7
+   Number of public wire bits:       7
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                  5
+     $_ANDNOT_                       1
+     $_AND_                          1
+     $_OR_                           1
+     $_XNOR_                         2
+</code></pre>
+<h3 id="half-adder-implementation-1">Half Adder Implementation</h3>
+<pre><code>
+12. Printing statistics.
+
+=== full_adder_half_adder ===
+
+   Number of wires:                 10
+   Number of wire bits:             10
+   Number of public wires:          10
+   Number of public wire bits:      10
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                  3
+     $_OR_                           1
+     half_adder                      2
+
+=== half_adder ===
+
+   Number of wires:                  4
+   Number of wire bits:              4
+   Number of public wires:           4
+   Number of public wire bits:       4
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                  2
+     $_AND_                          1
+     $_XOR_                          1
+
+=== design hierarchy ===
+
+   full_adder_half_adder             1
+     half_adder                      2
+
+   Number of wires:                 18
+   Number of wire bits:             18
+   Number of public wires:          18
+   Number of public wire bits:      18
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                  5
+     $_AND_                          2
+     $_OR_                           1
+     $_XOR_                          2
+</code></pre>
+</body>
+</html>
