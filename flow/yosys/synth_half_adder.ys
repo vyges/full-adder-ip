@@ -1,0 +1,46 @@
+#==============================================================================
+# Full Adder Half Adder Implementation Synthesis Script
+#==============================================================================
+# Description: Yosys synthesis script for half adder modular implementation
+# Author:      Vyges Team
+# Date:        2025-07-17
+# Version:     1.0.0
+#==============================================================================
+
+# Read RTL
+read_verilog -sv ../../rtl/full_adder_half_adder.v
+
+# Set top module
+hierarchy -top full_adder_half_adder
+
+# Check design
+check
+
+# Generate statistics before synthesis
+stat
+
+# Synthesize to generic gates
+synth -top full_adder_half_adder
+
+# Optimize design
+opt -purge
+
+# Generate statistics after synthesis
+stat
+
+# Write netlist
+write_verilog -noattr -noexpr -nohex -nodec ../../flow/yosys/full_adder_half_adder_synth.v
+
+# Write JSON for further processing
+write_json ../../flow/yosys/full_adder_half_adder_synth.json
+
+# Generate detailed statistics
+tee -o ../../flow/yosys/full_adder_half_adder_stats.txt stat
+
+# Show hierarchy
+tee -o ../../flow/yosys/full_adder_half_adder_hierarchy.txt hierarchy
+
+# Show ports (commented out due to Graphviz format issue)
+# tee -o ../../flow/yosys/full_adder_half_adder_ports.txt show -format verilog full_adder_half_adder
+
+# Synthesis complete for half adder implementation 

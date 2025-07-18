@@ -13,8 +13,8 @@ SIM ?= icarus
 TOPLEVEL = tb_full_adder
 
 # Source files
-RTL_SOURCES = ../../rtl/full_adder.v
-TB_SOURCES = tb_full_adder.v
+RTL_SOURCES = ../../rtl/full_adder.v ../../rtl/full_adder_simple.v ../../rtl/full_adder_half_adder.v
+TB_SOURCES = tb_full_adder.v tb_full_adder_simple.v tb_full_adder_half_adder.v
 
 # Simulator-specific settings
 ifeq ($(SIM),icarus)
@@ -28,10 +28,14 @@ ifeq ($(SIM),icarus)
 else ifeq ($(SIM),verilator)
     # Verilator settings
     VLOG = verilator
-    VLOG_FLAGS = --cc --exe --build --trace --top-module $(TOPLEVEL)
-    VLOG_FLAGS += -I ../../rtl
-    SIM_EXEC = obj_dir/V$(TOPLEVEL)
-    COMPILE = $(VLOG) $(VLOG_FLAGS) $(RTL_SOURCES) $(TB_SOURCES)
+    VLOG_FLAGS = --cc --build --trace --top-module $(TOPLEVEL) --timing
+    VLOG_FLAGS += -I../../rtl
+    SIM_EXEC = verilator_sim
+    COMPILE = $(VLOG) $(VLOG_FLAGS) $(RTL_SOURCES) $(TB_SOURCES) && \
+              c++ -I. -Iobj_dir -I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include \
+              -I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include/vltstd \
+              -std=gnu++20 verilator_wrapper.cpp obj_dir/libVtb_full_adder.a \
+              obj_dir/libverilated.a -o $(SIM_EXEC)
     RUN = ./$(SIM_EXEC)
 else ifeq ($(SIM),questa)
     # Questa/ModelSim settings
@@ -75,6 +79,46 @@ test_random: run
 test_all: test_basic test_random
 	@echo "All tests completed"
 
+# Individual implementation tests
+test_carry_lookahead:
+	@echo "Testing Carry Lookahead Implementation..."
+	$(VLOG) $(VLOG_FLAGS) -o simv_carry_lookahead.out ../../rtl/full_adder.v tb_full_adder.v
+	$(VVP) simv_carry_lookahead.out
+	@echo "Carry Lookahead test completed"
+
+test_simple:
+	@echo "Testing Simple XOR/AND Implementation..."
+ifeq ($(SIM),verilator)
+	verilator --cc --build --trace --top-module tb_full_adder_simple --timing -I../../rtl ../../rtl/full_adder_simple.v tb_full_adder_simple.v && \
+	c++ -I. -Iobj_dir -I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include \
+	-I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include/vltstd \
+	-std=gnu++20 verilator_wrapper_simple.cpp obj_dir/libVtb_full_adder_simple.a \
+	obj_dir/libverilated.a -o verilator_simple_sim && \
+	./verilator_simple_sim
+else
+	$(VLOG) $(VLOG_FLAGS) -o simv_simple.out ../../rtl/full_adder_simple.v tb_full_adder_simple.v
+	$(VVP) simv_simple.out
+endif
+	@echo "Simple implementation test completed"
+
+test_half_adder:
+	@echo "Testing Half Adder Modular Implementation..."
+ifeq ($(SIM),verilator)
+	verilator --cc --build --trace --top-module tb_full_adder_half_adder --timing -I../../rtl ../../rtl/full_adder_half_adder.v tb_full_adder_half_adder.v && \
+	c++ -I. -Iobj_dir -I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include \
+	-I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include/vltstd \
+	-std=gnu++20 verilator_wrapper_half_adder.cpp obj_dir/libVtb_full_adder_half_adder.a \
+	obj_dir/libverilated.a -o verilator_half_adder_sim && \
+	./verilator_half_adder_sim
+else
+	$(VLOG) $(VLOG_FLAGS) -o simv_half_adder.out ../../rtl/full_adder_half_adder.v tb_full_adder_half_adder.v
+	$(VVP) simv_half_adder.out
+endif
+	@echo "Half Adder modular test completed"
+
+test_all_implementations: test_carry_lookahead test_simple test_half_adder
+	@echo "All three implementations tested successfully!"
+
 # Waveform viewing
 waves:
 ifeq ($(SIM),icarus)
@@ -114,15 +158,19 @@ help:
 	@echo "==========================================="
 	@echo ""
 	@echo "Available targets:"
-	@echo "  all           - Compile and run (default)"
-	@echo "  compile       - Compile the design and testbench"
-	@echo "  run           - Run the simulation"
-	@echo "  test_basic    - Run basic functionality test"
-	@echo "  test_random   - Run random input test"
-	@echo "  test_all      - Run all tests"
-	@echo "  waves         - View waveforms"
-	@echo "  clean         - Clean build artifacts"
-	@echo "  help          - Show this help message"
+	@echo "  all                    - Compile and run (default)"
+	@echo "  compile                - Compile the design and testbench"
+	@echo "  run                    - Run the simulation"
+	@echo "  test_basic             - Run basic functionality test"
+	@echo "  test_random            - Run random input test"
+	@echo "  test_all               - Run all tests"
+	@echo "  test_carry_lookahead   - Test carry lookahead implementation"
+	@echo "  test_simple            - Test simple XOR/AND implementation"
+	@echo "  test_half_adder        - Test half adder modular implementation"
+	@echo "  test_all_implementations - Test all three implementations"
+	@echo "  waves                  - View waveforms"
+	@echo "  clean                  - Clean build artifacts"
+	@echo "  help                   - Show this help message"
 	@echo ""
 	@echo "Available simulators (set SIM=<simulator>):"
 	@echo "  icarus        - Icarus Verilog (default)"

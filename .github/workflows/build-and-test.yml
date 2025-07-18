@@ -4,7 +4,18 @@ name: Build and Test IP
 # It provides a generic build and test pipeline for Vyges IP projects
 
 on:
-  # Manual trigger only - no automatic triggers
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - '**.md'
+      - '.github/ISSUE_TEMPLATE/**'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - '**.md'
+      - '.github/ISSUE_TEMPLATE/**'
   workflow_dispatch:
     inputs:
       # Allow users to specify which components to test
@@ -63,9 +74,14 @@ jobs:
           # This workflow is disabled by default
           # Repository maintainers can enable it by setting this environment variable
           # or by modifying this check
-          echo "should-run=false" >> $GITHUB_OUTPUT
-          echo "⚠️ This workflow is disabled by default"
-          echo "To enable: Set ENABLE_BUILD_TEST=true in repository secrets or modify this check"
+          if [ "${{ secrets.ENABLE_BUILD_TEST }}" = "true" ]; then
+            echo "should-run=true" >> $GITHUB_OUTPUT
+            echo "✅ Workflow enabled via repository secret"
+          else
+            echo "should-run=false" >> $GITHUB_OUTPUT
+            echo "⚠️ This workflow is disabled by default"
+            echo "To enable: Set ENABLE_BUILD_TEST=true in repository secrets"
+          fi
 
   # Setup environment
   setup:
@@ -156,6 +172,9 @@ jobs:
             echo "❌ Yosys version $YOSYS_VERSION does not meet requirement (>= 0.39)"
             exit 1
           fi
+          
+          # Verify ABC is available
+          yosys -p "help abc" | grep -q "ABC" && echo "✅ ABC technology mapping available" || echo "❌ ABC not available"
 
       - name: Install Verilator 5.026
         run: |
@@ -242,11 +261,21 @@ jobs:
         run: |
           sudo apt-get install -y iverilog
           iverilog -V
+          
+      - name: Install GTKWave (for waveform viewing)
+        run: |
+          sudo apt-get install -y gtkwave
+          gtkwave --version
 
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install cocotb pytest pytest-cov
+
+      - name: Install Graphviz (for synthesis reports)
+        run: |
+          sudo apt-get install -y graphviz
+          dot -V
 
       - name: Setup Vyges CLI (if available)
         run: |
@@ -401,6 +430,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install cocotb pytest pytest-cov
 
+      - name: Install Graphviz (for synthesis reports)
+        run: |
+          sudo apt-get install -y graphviz
+          dot -V
+
       - name: Run simulation tests with ${{ matrix.simulator }}
         if: steps.check-simulator.outputs.should-run == 'true'
         run: |
@@ -464,23 +498,75 @@ jobs:
           echo "🔧 Checking synthesis configuration for ${{ matrix.platform }}..."
           
           if [ "${{ matrix.platform }}" = "asic" ]; then
-            if [ -d "flow/openlane" ]; then
-              echo "✅ Found OpenLane configuration for ASIC"
-              if [ -f "flow/openlane/config.json" ]; then
-                echo "✅ Found OpenLane config.json"
-              fi
+            if [ -d "flow/yosys" ]; then
+              echo "✅ Found Yosys configuration for ASIC"
+              cd flow/yosys
+              make all
+              make gate_analysis
+              make comprehensive_report
+              mkdir -p ../../public/asic
+              cp comprehensive_report.md ../../public/asic/
+              cp gate_analysis_report.md ../../public/asic/ || true
+              cd ../../
             else
-              echo "ℹ️ No OpenLane configuration found (expected for template)"
+              echo "❌ No Yosys configuration found for ASIC"
+              exit 1
             fi
           elif [ "${{ matrix.platform }}" = "fpga" ]; then
-            if [ -d "flow/vivado" ]; then
-              echo "✅ Found Vivado configuration for FPGA"
+            if [ -d "flow/fpga" ]; then
+              echo "✅ Found Yosys configuration for FPGA"
+              cd flow/fpga
+              make all
+              make fpga_analysis
+              make comprehensive_report
+              mkdir -p ../../public/fpga
+              cp comprehensive_fpga_report.md ../../public/fpga/
+              cp fpga_resource_analysis_report.md ../../public/fpga/ || true
+              cd ../../
             else
-              echo "ℹ️ No Vivado configuration found (expected for template)"
+              echo "❌ No Yosys configuration found for FPGA"
+              exit 1
             fi
           fi
           
           echo "✅ Synthesis configuration check complete"
+
+      - name: Upload Synthesis Reports as Artifacts
+        if: steps.check-platform.outputs.should-run == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: synthesis-reports-${{ matrix.platform }}
+          path: |
+            public/asic/
+            public/fpga/
+
+# Deploy job for GitHub Pages
+  deploy-pages:
+    if: github.ref == 'refs/heads/main' && always()
+    needs: [synthesis]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download synthesis artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: synthesis-reports-asic
+          path: public/asic
+      - name: Download FPGA artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: synthesis-reports-fpga
+          path: public/fpga
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
 
   # Generate test report
   report:

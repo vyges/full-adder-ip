@@ -1,0 +1,11 @@
+11. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `full_adder_half_adder'. Setting top module to full_adder_half_adder.
+
+11.1. Analyzing design hierarchy..
+Top module:  \full_adder_half_adder
+Used module:     \half_adder
+
+11.2. Analyzing design hierarchy..
+Top module:  \full_adder_half_adder
+Used module:     \half_adder
+Removed 0 unused modules.

@@ -1,0 +1,118 @@
+#==============================================================================
+# Full Adder Simple SystemVerilog Testbench Makefile
+#==============================================================================
+# Description: Makefile for running simplified SystemVerilog testbench
+#              with open-source simulators (Icarus, Verilator)
+# Author:      Vyges Team
+# Date:        2025-07-17
+# Version:     1.0.0
+#==============================================================================
+
+# Defaults
+SIM ?= icarus
+TOPLEVEL = tb_full_adder_simple_sv
+
+# Source files
+RTL_SOURCES = ../../rtl/full_adder.v
+TB_SOURCES = tb_full_adder_simple_sv.sv
+
+# Simulator-specific settings
+ifeq ($(SIM),icarus)
+    # Icarus Verilog settings
+    VLOG = iverilog
+    VSIM = vvp
+    VLOG_FLAGS = -g2012 -I ../../rtl
+    VSIM_FLAGS = -vcd $(TOPLEVEL).vcd
+else ifeq ($(SIM),verilator)
+    # Verilator settings
+    VLOG = verilator
+    VSIM = obj_dir/V$(TOPLEVEL)
+    VLOG_FLAGS = --cc --exe --build -CFLAGS "-I../../rtl"
+    VSIM_FLAGS = --trace --trace-structs
+endif
+
+# Default target
+all: compile run
+
+# Compile target
+compile:
+	@echo "Compiling with $(SIM)..."
+ifeq ($(SIM),icarus)
+	$(VLOG) $(VLOG_FLAGS) $(RTL_SOURCES) $(TB_SOURCES) -o $(TOPLEVEL)
+else ifeq ($(SIM),verilator)
+	$(VLOG) $(VLOG_FLAGS) $(RTL_SOURCES) $(TB_SOURCES) -o $(VSIM)
+endif
+	@echo "Compilation complete"
+
+# Run target
+run:
+	@echo "Running simulation..."
+ifeq ($(SIM),icarus)
+	$(VSIM) $(VSIM_FLAGS) $(TOPLEVEL)
+else ifeq ($(SIM),verilator)
+	./$(VSIM) $(VSIM_FLAGS)
+endif
+	@echo "Simulation complete"
+
+# Test all implementations
+test_carry_lookahead: compile
+	@echo "Testing carry lookahead implementation..."
+	$(VSIM) $(VSIM_FLAGS) $(TOPLEVEL)
+
+test_simple: 
+	@echo "Testing simple implementation..."
+	$(MAKE) SIM=$(SIM) RTL_SOURCES=../../rtl/full_adder_simple.v test_carry_lookahead
+
+test_half_adder:
+	@echo "Testing half adder implementation..."
+	$(MAKE) SIM=$(SIM) RTL_SOURCES=../../rtl/full_adder_half_adder.v test_carry_lookahead
+
+test_all: test_carry_lookahead test_simple test_half_adder
+
+# Waveform viewing
+waves:
+ifeq ($(SIM),icarus)
+	@echo "Use GTKWave to view waveforms: gtkwave $(TOPLEVEL).vcd"
+else ifeq ($(SIM),verilator)
+	@echo "Use GTKWave to view waveforms: gtkwave $(TOPLEVEL).vcd"
+endif
+
+# Clean target
+clean:
+	rm -rf $(TOPLEVEL)
+	rm -rf *.vcd
+	rm -rf *.fst
+	rm -rf *.ghw
+	rm -rf obj_dir
+	rm -rf *.log
+	rm -rf *.exe
+	rm -rf *.o
+	rm -rf *.a
+	rm -rf *.d
+
+# Help target
+help:
+	@echo "Full Adder Simple SystemVerilog Testbench Makefile"
+	@echo "=================================================="
+	@echo ""
+	@echo "Available targets:"
+	@echo "  all              - Compile and run (default)"
+	@echo "  compile          - Compile the design and testbench"
+	@echo "  run              - Run the simulation"
+	@echo "  test_carry_lookahead - Test carry lookahead implementation"
+	@echo "  test_simple      - Test simple XOR/AND implementation"
+	@echo "  test_half_adder  - Test half adder modular implementation"
+	@echo "  test_all         - Test all three implementations"
+	@echo "  waves            - View waveforms"
+	@echo "  clean            - Clean build artifacts"
+	@echo "  help             - Show this help message"
+	@echo ""
+	@echo "Available simulators (set SIM=<simulator>):"
+	@echo "  icarus           - Icarus Verilog (default)"
+	@echo "  verilator        - Verilator"
+	@echo ""
+	@echo "Example usage:"
+	@echo "  make test_all SIM=icarus"
+	@echo "  make test_carry_lookahead SIM=verilator"
+
+.PHONY: all compile run test_carry_lookahead test_simple test_half_adder test_all waves clean help 

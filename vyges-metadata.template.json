@@ -1,19 +1,19 @@
 {
   "$schema": "https://vyges.com/schema/v1/vyges-metadata.schema.json",
   "x-version": "1.0.0",
-  "name": "example/timer-16bit",
+  "name": "vyges/full-adder",
   "version": "1.0.0",
-  "description": "A 16-bit countdown timer with APB interface and interrupt support for embedded systems.",
+  "description": "A configurable full adder IP with three implementations: carry lookahead, simple XOR/AND, and half adder modular. Supports multiple interfaces and verification methodologies.",
   "license": "Apache-2.0",
   "template": "vyges-ip-template@1.0.0",
   "target": ["asic", "fpga"],
   "design_type": ["digital"],
   "maturity": "prototype",
   "created": "2025-07-17T03:03:25Z",
-  "updated": "2025-07-17T03:03:25Z",
+  "updated": "2025-07-17T08:11:00Z",
   "source": {
     "type": "git",
-    "url": "https://github.com/example/timer-16bit",
+    "url": "https://github.com/vyges/full-adder-ip",
     "commit": "main",
     "private": false,
     "containsEncryptedPayload": false,
@@ -21,15 +21,15 @@
   },
   "maintainers": [
     {
-      "name": "Example Developer",
-      "email": "developer@example.com",
-      "github": "example-dev"
+      "name": "Vyges Team",
+      "email": "team@vyges.com",
+      "github": "vyges"
     }
   ],
   "branding": {
-    "provider": "Example Company",
-    "logo": "https://example.com/assets/logo.svg",
-    "website": "https://example.com/ip/timer-16bit",
+    "provider": "Vyges",
+    "logo": "https://vyges.com/assets/logo.svg",
+    "website": "https://vyges.com/ip/full-adder",
     "usage": "Use of the logo is permitted for attribution or compatibility references only."
   },
   "interfaces": [
@@ -51,41 +51,47 @@
       ]
     },
     {
-      "type": "interrupt",
-      "direction": "output",
+      "type": "data",
+      "direction": "input",
       "signals": [
-        { "name": "timer_irq", "direction": "output", "type": "interrupt", "description": "Timer interrupt output" }
+        { "name": "a_i", "direction": "input", "width": 1, "type": "data", "description": "First operand input" },
+        { "name": "b_i", "direction": "input", "width": 1, "type": "data", "description": "Second operand input" },
+        { "name": "cin_i", "direction": "input", "width": 1, "type": "data", "description": "Carry input" },
+        { "name": "sum_o", "direction": "output", "width": 1, "type": "data", "description": "Sum output" },
+        { "name": "cout_o", "direction": "output", "width": 1, "type": "data", "description": "Carry output" }
       ]
     }
   ],
   "parameters": [
     {
-      "name": "TIMER_WIDTH",
-      "type": "int",
-      "default": 16,
-      "description": "Width of the timer counter",
-      "range": { "min": 8, "max": 32 },
-      "units": "bits",
+      "name": "IMPLEMENTATION",
+      "type": "string",
+      "default": "carry_lookahead",
+      "description": "Full adder implementation type",
+      "options": ["carry_lookahead", "simple", "half_adder"],
       "required": false
     },
     {
-      "name": "APB_ADDR_WIDTH",
-      "type": "int", 
-      "default": 16,
-      "description": "Width of APB address bus",
-      "range": { "min": 8, "max": 32 },
-      "units": "bits",
+      "name": "CLOCK_FREQ_MHZ",
+      "type": "int",
+      "default": 100,
+      "description": "Clock frequency in MHz",
+      "range": { "min": 1, "max": 1000 },
+      "units": "MHz",
       "required": false
     }
   ],
   "test": {
     "coverage": true,
-    "testbenches": ["cocotb", "systemverilog"],
-    "simulators": ["verilator", "iverilog"],
+    "testbenches": ["cocotb", "systemverilog", "uvm"],
+    "simulators": ["verilator", "iverilog", "questa"],
     "status": "passing"
   },
   "flows": {
     "verilator": {
+      "status": "verified"
+    },
+    "icarus": {
       "status": "verified"
     },
     "openlane": {
@@ -114,8 +120,8 @@
     "examples": [
       {
         "target": "simulation",
-        "wrapper": "integration/timer_wrapper.v",
-        "tb": "integration/timer_tb.v"
+        "wrapper": "integration/ripple_carry_adder.v",
+        "tb": "integration/ripple_carry_adder_tb.v"
       },
       {
         "target": "fpga",
@@ -144,8 +150,8 @@
       "generated_with": "vyges-cli"
     }
   },
-  "categories": ["peripheral", "controller", "timer"],
-  "tags": ["timer", "apb", "interrupt", "16bit"],
-  "keywords": ["timer", "countdown", "interrupt", "apb", "peripheral"]
+  "categories": ["arithmetic", "logic", "adder"],
+  "tags": ["full-adder", "arithmetic", "carry-lookahead", "half-adder"],
+  "keywords": ["full-adder", "arithmetic", "carry", "sum", "logic"]
 }
   

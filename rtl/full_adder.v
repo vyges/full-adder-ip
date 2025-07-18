@@ -8,6 +8,8 @@
 // Version:     1.0.0
 //=============================================================================
 
+`timescale 1ns/1ps
+
 module full_adder (
     input  logic clk_i,     // Clock input (for UVM compatibility)
     input  logic reset_n_i, // Active low reset (for UVM compatibility)

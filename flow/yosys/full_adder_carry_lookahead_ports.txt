@@ -1,0 +1,6 @@
+
+12. Generating Graphviz representation of design.
+Writing dot description to `/Users/smysore/.yosys_show.dot'.
+Dumping module full_adder to page 1.
+Exec: dot -Tverilog '/Users/smysore/.yosys_show.dot' > '/Users/smysore/.yosys_show.verilog.new' && mv '/Users/smysore/.yosys_show.verilog.new' '/Users/smysore/.yosys_show.verilog'
+ERROR: Shell command failed!

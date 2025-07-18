@@ -85,3 +85,47 @@ secrets.json
 .vyges-ai-context.json.backup.*
 .vyges-ai-context.sha256
 
+# Simulation and synthesis artifacts
+*.vcd
+*.fsdb
+*.vpd
+*.log
+*.out
+simv
+simv.daidir/
+obj_dir/
+*.a
+*.o
+*.so
+*.dylib
+*.dll
+
+# Verilator specific
+verilator_sim*
+verilator_*_sim
+
+# VCS specific
+simv*
+*.daidir/
+*.key
+*.log
+*.vpd
+
+# Questa/ModelSim specific
+*.wlf
+*.qdb
+*.qws
+work/
+modelsim.ini
+transcript
+
+# Icarus Verilog specific
+*.vvp
+*.vcd
+
+# Build directories
+build/
+synth/
+impl/
+reports/
+

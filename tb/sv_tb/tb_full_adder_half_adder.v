@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module tb_full_adder;
+module tb_full_adder_half_adder;
 
     // Testbench signals - following Vyges conventions
     logic clk_i, reset_n_i;
@@ -20,11 +20,8 @@ module tb_full_adder;
         #10 reset_n_i = 1;
     end
     
-    // Instantiate the full adder module (carry lookahead implementation)
-    // To test other implementations, replace with:
-    // full_adder_simple dut (.clk_i(clk_i), .reset_n_i(reset_n_i), .a_i(a_i), .b_i(b_i), .cin_i(cin_i), .sum_o(sum_o), .cout_o(cout_o));
-    // full_adder_half_adder dut (.clk_i(clk_i), .reset_n_i(reset_n_i), .a_i(a_i), .b_i(b_i), .cin_i(cin_i), .sum_o(sum_o), .cout_o(cout_o));
-    full_adder dut (
+    // Instantiate the half adder modular full adder module
+    full_adder_half_adder dut (
         .clk_i(clk_i),
         .reset_n_i(reset_n_i),
         .a_i(a_i),
@@ -36,7 +33,7 @@ module tb_full_adder;
     
     // Test stimulus and monitoring
     initial begin
-        $display("=== Full Adder Testbench ===");
+        $display("=== Full Adder Half Adder Modular Testbench ===");
         $display("Time\ta_i\tb_i\tcin_i\tsum_o\tcout_o\tExpected sum_o\tExpected cout_o\tStatus");
         $display("----------------------------------------------------------------------------");
         
@@ -88,8 +85,8 @@ module tb_full_adder;
     
     // Optional: Generate VCD file for waveform viewing
     initial begin
-        $dumpfile("full_adder.vcd");
-        $dumpvars(0, tb_full_adder);
+        $dumpfile("full_adder_half_adder.vcd");
+        $dumpvars(0, tb_full_adder_half_adder);
     end
 
-endmodule
+endmodule 
