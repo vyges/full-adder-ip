@@ -46,14 +46,17 @@ endif
 
 # Test carry lookahead implementation
 test_carry_lookahead:
+	$(MAKE) clean
 	$(MAKE) SIM=$(SIM) MODULE=test_full_adder TOPLEVEL=full_adder
 
 # Test simple XOR/AND implementation
 test_simple:
+	$(MAKE) clean
 	$(MAKE) SIM=$(SIM) MODULE=test_full_adder_simple TOPLEVEL=full_adder_simple
 
 # Test half adder modular implementation
 test_half_adder:
+	$(MAKE) clean
 	$(MAKE) SIM=$(SIM) MODULE=test_full_adder_half_adder TOPLEVEL=full_adder_half_adder
 
 # Test all implementations
@@ -61,6 +64,7 @@ test_all_implementations: test_carry_lookahead test_simple test_half_adder
 
 # Test with enhanced testbench
 test_enhanced:
+	$(MAKE) clean
 	$(MAKE) SIM=$(SIM) MODULE=test_all_implementations TOPLEVEL=full_adder
 
 # Legacy targets for backward compatibility
