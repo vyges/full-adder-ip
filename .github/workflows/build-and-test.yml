@@ -258,20 +258,20 @@ jobs:
           if [ -d "tb" ]; then
             echo "Found testbench directory"
             
-            # Run the testbench Makefile
-            if [ -f "tb/Makefile" ]; then
-              echo "Running testbench Makefile..."
-              cd tb
-              
+            # Run SystemVerilog tests directly
+            if [ -d "tb/sv_tb" ]; then
               echo "Running SystemVerilog tests with Verilator..."
-              make test_basic TESTBENCH_TYPE=sv SIM=verilator
-              
+              cd tb/sv_tb
+              make test_basic SIM=verilator
+              cd ../..
+            fi
+            
+            # Run UVM tests directly
+            if [ -d "tb/uvm_tb" ]; then
               echo "Running UVM tests with Verilator..."
-              make test_basic TESTBENCH_TYPE=uvm SIM=verilator
-              
-              cd ..
-            else
-              echo "⚠️ No Makefile found in tb directory"
+              cd tb/uvm_tb
+              make test_basic SIM=verilator
+              cd ../..
             fi
             
             # Look for SystemVerilog testbenches
@@ -303,20 +303,20 @@ jobs:
           if [ -d "tb" ]; then
             echo "Found testbench directory"
             
-            # Run the testbench Makefile
-            if [ -f "tb/Makefile" ]; then
-              echo "Running testbench Makefile..."
-              cd tb
-              
+            # Run SystemVerilog tests directly
+            if [ -d "tb/sv_tb" ]; then
               echo "Running SystemVerilog tests with Icarus..."
-              make test_basic TESTBENCH_TYPE=sv SIM=icarus
-              
+              cd tb/sv_tb
+              make test_basic SIM=icarus
+              cd ../..
+            fi
+            
+            # Run UVM tests directly
+            if [ -d "tb/uvm_tb" ]; then
               echo "Running UVM tests with Icarus..."
-              make test_basic TESTBENCH_TYPE=uvm SIM=icarus
-              
-              cd ..
-            else
-              echo "⚠️ No Makefile found in tb directory"
+              cd tb/uvm_tb
+              make test_basic SIM=icarus
+              cd ../..
             fi
             
             # Look for SystemVerilog testbenches
