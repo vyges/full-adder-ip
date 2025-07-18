@@ -140,19 +140,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install cocotb pytest pytest-cov
 
-      - name: Setup Vyges CLI (if available)
-        run: |
-          # Check if Vyges CLI is available
-          if command -v vyges &> /dev/null; then
-            echo "Vyges CLI found"
-            vyges --version
-          else
-            echo "Vyges CLI not found - skipping CLI-based tests"
-          fi
+      # Commented out Vyges CLI setup - not needed for template
+      # - name: Setup Vyges CLI (if available)
+      #   run: |
+      #     # Check if Vyges CLI is available
+      #     if command -v vyges &> /dev/null; then
+      #       echo "Vyges CLI found"
+      #       vyges --version
+      #     else
+      #       echo "Vyges CLI not found - skipping CLI-based tests"
+      #     fi
 
       # Validation step
       - name: Validate project structure
-        if: github.event.inputs.test_validation == 'true'
+        if: github.event.inputs.test_validation == 'true' || github.event_name != 'workflow_dispatch'
         run: |
           echo "🔍 Validating project structure..."
           
@@ -187,7 +188,7 @@ jobs:
           echo "✅ Project structure validation complete"
 
       - name: Validate metadata (if Vyges CLI available)
-        if: github.event.inputs.test_validation == 'true'
+        if: github.event.inputs.test_validation == 'true' || github.event_name != 'workflow_dispatch'
         run: |
           if command -v vyges &> /dev/null; then
             echo "🔍 Validating metadata with Vyges CLI..."
@@ -198,7 +199,7 @@ jobs:
 
       # Linting step
       - name: Lint SystemVerilog files
-        if: github.event.inputs.test_linting == 'true'
+        if: github.event.inputs.test_linting == 'true' || github.event_name != 'workflow_dispatch'
         run: |
           echo "🔍 Linting SystemVerilog files..."
           
@@ -225,7 +226,7 @@ jobs:
           echo "✅ Linting complete"
 
       - name: Check file permissions
-        if: github.event.inputs.test_linting == 'true'
+        if: github.event.inputs.test_linting == 'true' || github.event_name != 'workflow_dispatch'
         run: |
           echo "🔍 Checking file permissions..."
           
@@ -241,7 +242,7 @@ jobs:
 
       # Simulation step
       - name: Run simulation tests with Verilator
-        if: github.event.inputs.test_simulation == 'true' && (github.event.inputs.simulator == 'verilator' || github.event.inputs.simulator == 'both')
+        if: (github.event.inputs.test_simulation == 'true' || github.event_name != 'workflow_dispatch') && (github.event.inputs.simulator == 'verilator' || github.event.inputs.simulator == 'both' || github.event_name != 'workflow_dispatch')
         run: |
           echo "🧪 Running simulation tests with Verilator..."
           
@@ -283,7 +284,7 @@ jobs:
           echo "✅ Verilator simulation test execution complete"
 
       - name: Run simulation tests with Icarus
-        if: github.event.inputs.test_simulation == 'true' && (github.event.inputs.simulator == 'icarus' || github.event.inputs.simulator == 'both')
+        if: (github.event.inputs.test_simulation == 'true' || github.event_name != 'workflow_dispatch') && (github.event.inputs.simulator == 'icarus' || github.event.inputs.simulator == 'both' || github.event_name != 'workflow_dispatch')
         run: |
           echo "🧪 Running simulation tests with Icarus..."
           
@@ -326,7 +327,7 @@ jobs:
 
       # Synthesis step
       - name: Run ASIC synthesis
-        if: github.event.inputs.test_synthesis == 'true' && (github.event.inputs.target_platform == 'asic' || github.event.inputs.target_platform == 'both')
+        if: (github.event.inputs.test_synthesis == 'true' || github.event_name != 'workflow_dispatch') && (github.event.inputs.target_platform == 'asic' || github.event.inputs.target_platform == 'both' || github.event_name != 'workflow_dispatch')
         run: |
           echo "🔧 Running ASIC synthesis..."
           
@@ -363,7 +364,7 @@ jobs:
           echo "✅ ASIC synthesis complete"
 
       - name: Run FPGA synthesis
-        if: github.event.inputs.test_synthesis == 'true' && (github.event.inputs.target_platform == 'fpga' || github.event.inputs.target_platform == 'both')
+        if: (github.event.inputs.test_synthesis == 'true' || github.event_name != 'workflow_dispatch') && (github.event.inputs.target_platform == 'fpga' || github.event.inputs.target_platform == 'both' || github.event_name != 'workflow_dispatch')
         run: |
           echo "🔧 Running FPGA synthesis..."
           
@@ -400,7 +401,7 @@ jobs:
 
       # Upload artifacts
       - name: Upload Synthesis Reports as Artifacts
-        if: github.event.inputs.test_synthesis == 'true'
+        if: github.event.inputs.test_synthesis == 'true' || github.event_name != 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: synthesis-reports
@@ -430,7 +431,7 @@ jobs:
 
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
-        if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.event.inputs.test_synthesis == 'true'
+        if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && (github.event.inputs.test_synthesis == 'true' || github.event_name != 'workflow_dispatch')
         uses: peaceiris/actions-gh-pages@v4
         with:
           publish_dir: ./public
