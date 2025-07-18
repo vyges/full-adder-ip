@@ -409,25 +409,21 @@ jobs:
             public/asic/
             public/fpga/
 
-      # Generate test report
-      - name: Generate test report
+      # Generate comprehensive test harness report
+      - name: Generate test harness report
         if: always()
         run: |
-          echo "📊 Test Report"
-          echo "=============="
-          echo "Repository: ${{ github.repository }}"
-          echo "Workflow: ${{ github.workflow }}"
-          echo "Run ID: ${{ github.run_id }}"
-          echo ""
-          echo "Workflow Configuration:"
-          echo "- Test Validation: ${{ github.event.inputs.test_validation || 'true' }}"
-          echo "- Test Linting: ${{ github.event.inputs.test_linting || 'true' }}"
-          echo "- Test Simulation: ${{ github.event.inputs.test_simulation || 'true' }}"
-          echo "- Test Synthesis: ${{ github.event.inputs.test_synthesis || 'true' }}"
-          echo "- Target Platform: ${{ github.event.inputs.target_platform || 'both' }}"
-          echo "- Simulator: ${{ github.event.inputs.simulator || 'both' }}"
-          echo ""
-          echo "Note: This is a template repository. Actual tests require IP-specific implementation."
+          echo "📊 Generating comprehensive test harness report..."
+          python3 generate_test_harness_report.py
+          
+          # Copy report to public directory for GitHub Pages
+          if [ -f "test_harness_report.md" ]; then
+            mkdir -p public
+            cp test_harness_report.md public/
+            echo "✅ Test harness report generated and copied to public directory"
+          else
+            echo "⚠️ Test harness report generation failed"
+          fi
 
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
@@ -442,7 +438,7 @@ jobs:
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Full Adder IP - Synthesis Reports</title>
+              <title>Full Adder IP - Reports</title>
               <style>
                   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
                   h1 { color: #0366d6; border-bottom: 1px solid #e1e4e8; padding-bottom: 10px; }
@@ -450,12 +446,20 @@ jobs:
                   .report-section { background: #f6f8fa; padding: 20px; border-radius: 6px; margin: 20px 0; }
                   .report-link { display: inline-block; background: #0366d6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin: 10px 5px; }
                   .report-link:hover { background: #0256cc; }
+                  .report-link.test { background: #28a745; }
+                  .report-link.test:hover { background: #218838; }
                   .timestamp { color: #586069; font-size: 14px; }
               </style>
           </head>
           <body>
-              <h1>🔧 Full Adder IP - Synthesis Reports</h1>
+              <h1>🔧 Full Adder IP - Comprehensive Reports</h1>
               <p class="timestamp">Generated: $(date -u)</p>
+              
+              <div class="report-section">
+                  <h2>🧪 Test Harness Report</h2>
+                  <p>Comprehensive test results including simulation, synthesis, and validation reports for all implementations.</p>
+                  <a href="./test_harness_report.md" class="report-link test">📋 Test Harness Report</a>
+              </div>
               
               <div class="report-section">
                   <h2>📊 ASIC Synthesis Reports</h2>
@@ -484,9 +488,12 @@ jobs:
           </html>
           EOF
           
-          # Configure git for deployment
+          # Configure git for deployment with proper authentication
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Set up authentication using GITHUB_TOKEN
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           
           # Create or update gh-pages branch
           if git ls-remote --heads origin gh-pages | grep gh-pages; then
