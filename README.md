@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![Maturity](https://img.shields.io/badge/Maturity-Production-brightgreen)](https://vyges.com/docs/maturity-levels)
 [![Target](https://img.shields.io/badge/Target-ASIC%20%7C%20FPGA-orange)](https://vyges.com/docs/target-platforms)
-[![Verification](https://img.shields.io/badge/Verification-UVM%20%7C%20Cocotb%20%7C%20SystemVerilog-purple)](https://vyges.com/docs/verification)
+[![Verification](https://img.shields.io/badge/Verification-Cocotb%20%7C%20SystemVerilog-purple)](https://vyges.com/docs/verification)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-blue?style=flat&logo=github)](https://vyges.github.io/full-adder-ip/)
 [![Repository](https://img.shields.io/badge/Repository-GitHub-black?style=flat&logo=github)](https://github.com/vyges/full-adder-ip)
 [![Issues](https://img.shields.io/badge/Issues-GitHub-orange?style=flat&logo=github)](https://github.com/vyges/full-adder-ip/issues)
@@ -59,8 +59,8 @@ The Full Adder IP provides three different implementation approaches for the fun
 
 ```systemverilog
 module full_adder (
-    input  logic clk_i,     // Clock input (for UVM compatibility)
-    input  logic reset_n_i, // Active low reset (for UVM compatibility)
+    input  logic clk_i,     // Clock input
+    input  logic reset_n_i, // Active low reset
     input  logic a_i,       // First input bit
     input  logic b_i,       // Second input bit
     input  logic cin_i,     // Carry input from previous stage
@@ -96,16 +96,6 @@ make test_basic SIM=icarus
 make test_all SIM=verilator
 ```
 
-#### UVM Testbench (Most Comprehensive)
-```bash
-# Using Questa/ModelSim
-cd tb/uvm_tb
-make test_basic SIM=questa
-make gui SIM=questa  # For waveform viewing
-
-# Using VCS
-make test_all SIM=vcs
-```
 
 #### Cocotb Testbench (Python-based)
 ```bash
@@ -122,7 +112,6 @@ make test_all SIM=verilator
 # Run any testbench type from the main tb directory
 cd tb
 make test_basic TESTBENCH_TYPE=sv SIM=icarus
-make test_all TESTBENCH_TYPE=uvm SIM=questa
 make test_all TESTBENCH_TYPE=cocotb SIM=verilator
 
 # Test all three testbench types
@@ -222,11 +211,6 @@ full-adder-ip/
 │   ├── sv_tb/                    # SystemVerilog testbench
 │   │   ├── Makefile             # SystemVerilog Makefile
 │   │   └── tb_full_adder.v      # Universal testbench
-│   ├── uvm_tb/                   # UVM testbench
-│   │   ├── Makefile             # UVM Makefile
-│   │   ├── full_adder_if.sv     # Virtual interface
-│   │   ├── full_adder_pkg.sv    # UVM package with all components
-│   │   └── tb_full_adder_uvm.sv # Top-level UVM testbench
 │   └── cocotb/                   # Cocotb testbench
 │       ├── Makefile             # Cocotb Makefile
 │       └── test_full_adder.py   # Python-based testbench
@@ -258,21 +242,14 @@ full-adder-ip/
 - **Purpose**: Simple, direct verification approach
 - **Best for**: Quick verification, learning, simple designs
 - **Features**: Direct signal manipulation, manual test case generation, basic error reporting
-- **Simulators**: Icarus Verilog, Verilator, Questa/ModelSim, VCS
+- **Simulators**: Icarus Verilog, Verilator
 
-### 2. UVM Testbench (`tb/uvm_tb/`)
-- **Purpose**: Advanced verification methodology
-- **Best for**: Complex verification, reusable components, team environments
-- **Features**: Component-based architecture, reusable verification components, advanced features (coverage, sequences, factory patterns)
-- **Components**: Transaction, Driver, Monitor, Scoreboard, Agent, Environment, Sequences, Tests
-- **Simulators**: Questa/ModelSim, VCS, Xcelium, Verilator (limited)
-
-### 3. Cocotb Testbench (`tb/cocotb/`)
+### 2. Cocotb Testbench (`tb/cocotb/`)
 - **Purpose**: Python-based verification
 - **Best for**: Python developers, rapid prototyping, custom verification logic
 - **Features**: Python-based test development, easy integration with Python libraries, cross-simulator compatibility, async/await support
 - **Test Scenarios**: Basic functionality, random input testing, edge cases, reset functionality, timing analysis, coverage scenarios
-- **Simulators**: Icarus Verilog, Verilator, Questa/ModelSim, VCS
+- **Simulators**: Icarus Verilog, Verilator
 
 ## Performance Specifications
 
@@ -320,13 +297,13 @@ full-adder-ip/
 
 ## Tool Support
 
-- **Simulators**: Verilator, Icarus Verilog, ModelSim/QuestaSim, VCS, Xcelium
-- **ASIC Synthesis**: OpenLane, Yosys (with ABC technology mapping)
-- **FPGA Synthesis**: Yosys (Xilinx 7-series), Vivado
+- **Simulators**: Verilator, Icarus Verilog
+- **ASIC Synthesis**: Yosys (with ABC technology mapping)
+- **FPGA Synthesis**: Yosys (Xilinx 7-series)
 - **PDKs**: Sky130B, GF180MCU
 - **FPGAs**: Xilinx 7-series (Artix-7, Kintex-7, Virtex-7)
 - **Linting**: Verilator (clean)
-- **Verification**: UVM, Cocotb, SystemVerilog
+- **Verification**: Cocotb, SystemVerilog
 - **Analysis**: Automated gate-level and FPGA resource analysis
 
 ## Test Coverage
@@ -335,7 +312,6 @@ full-adder-ip/
 - ✅ Timing analysis
 - ✅ Universal testbench compatibility
 - ✅ VCD waveform generation
-- ✅ UVM methodology implementation
 - ✅ Python-based verification with Cocotb
 - ✅ Cross-simulator compatibility
 - ✅ Gate-level synthesis and analysis
@@ -349,7 +325,6 @@ This IP follows all Vyges conventions:
 - ✅ Required module headers with metadata
 - ✅ Proper file organization
 - ✅ Comprehensive documentation
-- ✅ Universal testbench compatibility
 - ✅ Multiple verification methodologies
 
 ## Documentation
@@ -369,6 +344,5 @@ This IP follows Vyges development conventions. See `.vyges-ai-context.json` for 
 ## References
 
 - [Full Adder Explanation](https://www.geeksforgeeks.org/digital-logic/full-adder-in-digital-logic/)
-- [UVM User Guide](https://www.accellera.org/downloads/standards/uvm)
 - [Cocotb Documentation](https://docs.cocotb.org/)
 - [Vyges IP Development Guide](https://vyges.com/docs/ip-development)

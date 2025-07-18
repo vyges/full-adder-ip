@@ -3,7 +3,7 @@
   "x-version": "1.0.0",
   "name": "vyges/full-adder-ip",
   "version": "1.0.0",
-  "description": "A configurable full adder IP with three implementation approaches: simple XOR/AND gates, modular half adder design, and carry lookahead structure for optimal performance and scalability. Includes comprehensive verification with SystemVerilog, UVM, and Cocotb testbenches.",
+  "description": "A configurable full adder IP with three implementation approaches: simple XOR/AND gates, modular half adder design, and carry lookahead structure for optimal performance and scalability. Includes comprehensive verification with SystemVerilog and Cocotb testbenches.",
   "license": "Apache-2.0",
   "template": "vyges-ip-template@1.0.0",
   "target": ["asic", "fpga"],
@@ -37,8 +37,8 @@
       "type": "combinational",
       "direction": "bidirectional",
       "signals": [
-        { "name": "clk_i", "direction": "input", "type": "clock", "width": 1, "description": "Clock input (for UVM compatibility)" },
-        { "name": "reset_n_i", "direction": "input", "type": "reset", "width": 1, "description": "Active low reset (for UVM compatibility)" },
+        { "name": "clk_i", "direction": "input", "type": "clock", "width": 1, "description": "Clock input"},
+        { "name": "reset_n_i", "direction": "input", "type": "reset", "width": 1, "description": "Active low reset" },
         { "name": "a_i", "direction": "input", "type": "data", "width": 1, "description": "First input bit" },
         { "name": "b_i", "direction": "input", "type": "data", "width": 1, "description": "Second input bit" },
         { "name": "cin_i", "direction": "input", "type": "data", "width": 1, "description": "Carry input from previous stage" },
@@ -68,8 +68,8 @@
   ],
   "test": {
     "coverage": true,
-    "testbenches": ["systemverilog", "uvm", "cocotb"],
-    "simulators": ["verilator", "iverilog", "modelsim", "vcs", "xcelium"],
+    "testbenches": ["systemverilog", "cocotb"],
+    "simulators": ["verilator", "iverilog"],
     "status": "passing",
     "synthesis_verification": true,
     "test_cases": [
@@ -89,25 +89,25 @@
         "name": "random_input_testing",
         "description": "Random input combinations for stress testing",
         "status": "passing",
-        "testbench": ["uvm", "cocotb"]
+        "testbench": ["cocotb"]
       },
       {
         "name": "edge_case_testing",
         "description": "Rapid input changes and edge cases",
         "status": "passing",
-        "testbench": ["uvm", "cocotb"]
+        "testbench": ["cocotb"]
       },
       {
         "name": "reset_functionality",
         "description": "Reset behavior verification",
         "status": "passing",
-        "testbench": ["uvm", "cocotb"]
+        "testbench": ["cocotb"]
       },
       {
         "name": "coverage_scenarios",
         "description": "Comprehensive coverage scenarios",
         "status": "passing",
-        "testbench": ["uvm", "cocotb"]
+        "testbench": ["cocotb"]
       },
       {
         "name": "synthesis_verification",
@@ -121,33 +121,19 @@
         "location": "tb/sv_tb/",
         "description": "Simple, direct verification approach",
         "features": ["Direct signal manipulation", "Manual test case generation", "Basic error reporting"],
-        "simulators": ["icarus", "verilator", "questa", "vcs"]
-      },
-      "uvm": {
-        "location": "tb/uvm_tb/",
-        "description": "Advanced verification methodology with component-based architecture",
-        "features": ["Transaction-based verification", "Reusable components", "Coverage-driven verification", "Sequences and factory patterns"],
-        "components": ["Transaction", "Driver", "Monitor", "Scoreboard", "Agent", "Environment", "Sequences", "Tests"],
-        "simulators": ["questa", "vcs", "xcelium", "verilator"]
+        "simulators": ["icarus", "verilator"]
       },
       "cocotb": {
         "location": "tb/cocotb/",
         "description": "Python-based verification with async/await support",
         "features": ["Python-based test development", "Cross-simulator compatibility", "Easy integration with Python libraries", "Async/await support"],
         "test_scenarios": ["Basic functionality", "Random input testing", "Edge cases", "Reset functionality", "Timing analysis", "Coverage scenarios"],
-        "simulators": ["icarus", "verilator", "questa", "vcs"]
+        "simulators": ["icarus", "verilator"]
       }
     }
   },
   "flows": {
     "verilator": {
-      "status": "verified"
-    },
-    "openlane": {
-      "pdks": ["sky130B"],
-      "status": "tested"
-    },
-    "vivado": {
       "status": "verified"
     },
     "yosys": {
@@ -160,10 +146,10 @@
   "asic": {
     "flavor": "digital",
     "pdks": ["sky130B", "gf180mcu"],
-    "synthesis_tool": "openlane",
+    "synthesis_tool": "yosys",
     "clock_freq_mhz": 500,
     "constraints": ["constraints.sdc"],
-    "tools": ["yosys", "openroad"],
+    "tools": ["yosys"],
     "area_um2": 50,
     "power_mw": 0.1,
     "gate_analysis": {
@@ -211,7 +197,7 @@
     }
   },
   "fpga": {
-    "toolchain": "vivado",
+    "toolchain": "yosys",
     "board": "arty-a7-35",
     "cfu_playground_compatible": true,
     "constraints": ["constraints.xdc"],
@@ -258,8 +244,8 @@
     }
   },
   "categories": ["arithmetic", "basic_logic"],
-  "tags": ["full_adder", "arithmetic", "carry_lookahead", "half_adder", "uvm", "cocotb", "verification"],
-  "keywords": ["full_adder", "arithmetic", "carry_propagation", "digital_logic", "adder", "uvm", "cocotb", "systemverilog", "verification", "gate_analysis", "synthesis"],
+  "tags": ["full_adder", "arithmetic", "carry_lookahead", "half_adder", "cocotb", "verification"],
+  "keywords": ["full_adder", "arithmetic", "carry_propagation", "digital_logic", "adder", "cocotb", "systemverilog", "verification", "gate_analysis", "synthesis"],
   "performance": {
     "max_frequency_mhz": 500,
     "propagation_delay_ps": 300,
@@ -272,7 +258,7 @@
     "test_coverage": 100
   },
   "verification": {
-    "methodologies": ["systemverilog", "uvm", "cocotb"],
+    "methodologies": ["systemverilog", "cocotb"],
     "coverage_types": ["functional", "code", "toggle"],
     "assertions": true,
     "formal_verification": false,

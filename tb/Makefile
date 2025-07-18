@@ -2,7 +2,7 @@
 # Full Adder Testbench Master Makefile
 #==============================================================================
 # Description: Master Makefile for running all testbench types (SystemVerilog,
-#              UVM, and cocotb) with various simulators.
+#              and cocotb) with various simulators.
 # Author:      Vyges Team
 # Date:        2025-07-17
 # Version:     1.0.0
@@ -13,12 +13,11 @@ TESTBENCH_TYPE ?= sv
 SIM ?= icarus
 
 # Available testbench types
-TB_TYPES = sv uvm cocotb
+TB_TYPES = sv cocotb
 
 # Available simulators
 SV_SIMS = icarus verilator
-UVM_SIMS = questa vcs xrun verilator
-COCOTB_SIMS = icarus verilator questa vcs
+COCOTB_SIMS = icarus verilator
 
 # Help target
 help:
@@ -27,30 +26,25 @@ help:
 	@echo ""
 	@echo "Available testbench types (set TESTBENCH_TYPE=<type>):"
 	@echo "  sv      - SystemVerilog testbench (default)"
-	@echo "  uvm     - UVM testbench"
 	@echo "  cocotb  - Cocotb testbench"
 	@echo ""
 	@echo "Available simulators by testbench type:"
 	@echo "  SystemVerilog: $(SV_SIMS)"
-	@echo "  UVM:           $(UVM_SIMS)"
 	@echo "  Cocotb:        $(COCOTB_SIMS)"
 	@echo ""
 	@echo "Usage examples:"
 	@echo "  make test_basic                    # Run basic test with default settings"
 	@echo "  make test_all                      # Run all tests with default settings"
-	@echo "  make test_basic TESTBENCH_TYPE=uvm SIM=questa"
 	@echo "  make test_all TESTBENCH_TYPE=cocotb SIM=verilator"
 	@echo "  make clean                         # Clean all testbench artifacts"
 	@echo "  make help                          # Show this help message"
 	@echo ""
 	@echo "Individual testbench directories:"
 	@echo "  sv_tb/     - SystemVerilog testbench"
-	@echo "  uvm_tb/    - UVM testbench"
 	@echo "  cocotb/    - Cocotb testbench"
 
 # Validation functions
 define validate_testbench_type
-	@if [ "$(TESTBENCH_TYPE)" != "sv" ] && [ "$(TESTBENCH_TYPE)" != "uvm" ] && [ "$(TESTBENCH_TYPE)" != "cocotb" ]; then \
 		echo "Error: Invalid TESTBENCH_TYPE '$(TESTBENCH_TYPE)'. Valid types: $(TB_TYPES)"; \
 		exit 1; \
 	fi
@@ -65,10 +59,6 @@ define validate_simulator
 				exit 1; \
 			fi \
 			;; \
-		uvm) \
-			if [ "$(filter $(SIM),$(UVM_SIMS))" = "" ]; then \
-				echo "Error: Simulator '$(SIM)' not supported for UVM testbench"; \
-				echo "Supported simulators: $(UVM_SIMS)"; \
 				exit 1; \
 			fi \
 			;; \
@@ -89,8 +79,6 @@ test_basic: validate_testbench_type validate_simulator
 		sv) \
 			cd sv_tb && $(MAKE) test_basic SIM=$(SIM) || exit 1; \
 			;; \
-		uvm) \
-			cd uvm_tb && $(MAKE) test_basic SIM=$(SIM) || exit 1; \
 			;; \
 		cocotb) \
 			cd cocotb && $(MAKE) test_basic SIM=$(SIM) || exit 1; \
@@ -104,8 +92,6 @@ test_random: validate_testbench_type validate_simulator
 		sv) \
 			cd sv_tb && $(MAKE) test_random SIM=$(SIM) || exit 1; \
 			;; \
-		uvm) \
-			cd uvm_tb && $(MAKE) test_random SIM=$(SIM) || exit 1; \
 			;; \
 		cocotb) \
 			cd cocotb && $(MAKE) test_random SIM=$(SIM) || exit 1; \
@@ -119,8 +105,6 @@ test_all: validate_testbench_type validate_simulator
 		sv) \
 			cd sv_tb && $(MAKE) test_all SIM=$(SIM) || exit 1; \
 			;; \
-		uvm) \
-			cd uvm_tb && $(MAKE) test_all SIM=$(SIM) || exit 1; \
 			;; \
 		cocotb) \
 			cd cocotb && $(MAKE) test_all SIM=$(SIM) || exit 1; \
@@ -128,28 +112,15 @@ test_all: validate_testbench_type validate_simulator
 	esac
 	@echo "All tests completed successfully!"
 
-# Coverage target (UVM only)
 coverage: validate_testbench_type validate_simulator
-	@if [ "$(TESTBENCH_TYPE)" != "uvm" ]; then \
-		echo "Error: Coverage is only available for UVM testbench"; \
 		exit 1; \
 	fi
-	@echo "Running coverage with UVM testbench using $(SIM) simulator..."
-	cd uvm_tb && $(MAKE) coverage SIM=$(SIM) || exit 1
 	@echo "Coverage completed successfully!"
 
-# GUI target (UVM only)
 gui: validate_testbench_type validate_simulator
-	@if [ "$(TESTBENCH_TYPE)" != "uvm" ]; then \
-		echo "Error: GUI is only available for UVM testbench"; \
 		exit 1; \
 	fi
-	@if [ "$(SIM)" != "questa" ]; then \
-		echo "Error: GUI is only available with Questa/ModelSim simulator"; \
-		exit 1; \
-	fi
-	@echo "Starting GUI with UVM testbench using Questa simulator..."
-	cd uvm_tb && $(MAKE) gui SIM=questa || exit 1
+	@echo "GUI target not implemented for current simulators"
 
 # Waveform viewing
 waves: validate_testbench_type validate_simulator
@@ -158,8 +129,6 @@ waves: validate_testbench_type validate_simulator
 		sv) \
 			cd sv_tb && $(MAKE) waves SIM=$(SIM) || exit 1; \
 			;; \
-		uvm) \
-			cd uvm_tb && $(MAKE) waves SIM=$(SIM) || exit 1; \
 			;; \
 		cocotb) \
 			cd cocotb && $(MAKE) waves SIM=$(SIM) || exit 1; \
@@ -173,8 +142,6 @@ compile: validate_testbench_type validate_simulator
 		sv) \
 			cd sv_tb && $(MAKE) compile SIM=$(SIM) || exit 1; \
 			;; \
-		uvm) \
-			cd uvm_tb && $(MAKE) compile SIM=$(SIM) || exit 1; \
 			;; \
 		cocotb) \
 			cd cocotb && $(MAKE) compile SIM=$(SIM) || exit 1; \
@@ -189,8 +156,6 @@ run: validate_testbench_type validate_simulator
 		sv) \
 			cd sv_tb && $(MAKE) run SIM=$(SIM) || exit 1; \
 			;; \
-		uvm) \
-			cd uvm_tb && $(MAKE) run SIM=$(SIM) || exit 1; \
 			;; \
 		cocotb) \
 			cd cocotb && $(MAKE) run SIM=$(SIM) || exit 1; \
@@ -225,8 +190,6 @@ benchmark:
 	@echo "Running performance benchmark..."
 	@echo "SystemVerilog testbench:"
 	@time $(MAKE) test_basic TESTBENCH_TYPE=sv SIM=icarus > /dev/null 2>&1
-	@echo "UVM testbench:"
-	@time $(MAKE) test_basic TESTBENCH_TYPE=uvm SIM=questa > /dev/null 2>&1
 	@echo "Cocotb testbench:"
 	@time $(MAKE) test_basic TESTBENCH_TYPE=cocotb SIM=icarus > /dev/null 2>&1
 	@echo "Benchmark completed!"
@@ -242,7 +205,6 @@ status:
 	@echo "Available simulators for $(TESTBENCH_TYPE):"
 	@case "$(TESTBENCH_TYPE)" in \
 		sv) echo "  $(SV_SIMS)" ;; \
-		uvm) echo "  $(UVM_SIMS)" ;; \
 		cocotb) echo "  $(COCOTB_SIMS)" ;; \
 	esac
 

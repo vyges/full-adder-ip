@@ -83,8 +83,8 @@
   ],
   "test": {
     "coverage": true,
-    "testbenches": ["cocotb", "systemverilog", "uvm"],
-    "simulators": ["verilator", "iverilog", "questa"],
+    "testbenches": ["cocotb", "systemverilog"],
+    "simulators": ["verilator", "iverilog"],
     "status": "passing"
   },
   "flows": {
