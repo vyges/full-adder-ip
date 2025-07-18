@@ -62,8 +62,8 @@ on:
 # and when explicitly enabled by repository maintainers
 
 jobs:
-  # Setup environment
-  setup:
+  # Main build and test job - everything runs sequentially on one runner
+  build-and-test:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -72,7 +72,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: '3.10'
 
       - name: Install system packages
         run: |
@@ -121,52 +121,24 @@ jobs:
             libboost-python-dev \
             libboost-filesystem-dev \
             verilator \
-            iverilog
+            iverilog \
+            yosys \
+            gtkwave
 
-      - name: Install Yosys from package
+      - name: Verify tool installations
         run: |
-          echo "🔧 Installing Yosys from package..."
-          
-          # Install Yosys from Ubuntu package manager
-          sudo apt-get update
-          sudo apt-get install -y yosys
-          
-          # Verify installation
-          yosys -V
-          
-          # Get Yosys version
-          YOSYS_VERSION=$(yosys -V | grep -oP 'Yosys \K[0-9]+\.[0-9]+')
-          echo "Installed Yosys version: $YOSYS_VERSION"
-          
-          # Verify ABC is available
-          yosys -p "help abc" | grep -q "ABC" && echo "✅ ABC technology mapping available" || echo "❌ ABC not available"
-          
-          # Test basic functionality
-          echo "Testing Yosys basic functionality..."
-          yosys -p "help" | head -5
-
-
-          
-      - name: Install GTKWave (for waveform viewing)
-        run: |
-          sudo apt-get install -y gtkwave
-          gtkwave --version
-
-      - name: Verify Icarus Verilog installation
-        run: |
-          echo "🔍 Verifying Icarus Verilog installation..."
+          echo "🔍 Verifying tool installations..."
+          verilator --version
           iverilog -V
-          echo "✅ Icarus Verilog is available"
+          yosys -V
+          gtkwave --version
+          dot -V
+          echo "✅ All tools are available"
 
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install cocotb pytest pytest-cov
-
-      - name: Install Graphviz (for synthesis reports)
-        run: |
-          sudo apt-get install -y graphviz
-          dot -V
 
       - name: Setup Vyges CLI (if available)
         run: |
@@ -178,16 +150,9 @@ jobs:
             echo "Vyges CLI not found - skipping CLI-based tests"
           fi
 
-  # Validate project structure
-  validate:
-    needs: [setup]
-    if: github.event.inputs.test_validation == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      # Validation step
       - name: Validate project structure
+        if: github.event.inputs.test_validation == 'true'
         run: |
           echo "🔍 Validating project structure..."
           
@@ -222,6 +187,7 @@ jobs:
           echo "✅ Project structure validation complete"
 
       - name: Validate metadata (if Vyges CLI available)
+        if: github.event.inputs.test_validation == 'true'
         run: |
           if command -v vyges &> /dev/null; then
             echo "🔍 Validating metadata with Vyges CLI..."
@@ -230,16 +196,9 @@ jobs:
             echo "⏭️ Skipping metadata validation (Vyges CLI not available)"
           fi
 
-  # Run linting checks
-  lint:
-    needs: [setup]
-    if: github.event.inputs.test_linting == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      # Linting step
       - name: Lint SystemVerilog files
+        if: github.event.inputs.test_linting == 'true'
         run: |
           echo "🔍 Linting SystemVerilog files..."
           
@@ -266,6 +225,7 @@ jobs:
           echo "✅ Linting complete"
 
       - name: Check file permissions
+        if: github.event.inputs.test_linting == 'true'
         run: |
           echo "🔍 Checking file permissions..."
           
@@ -279,50 +239,14 @@ jobs:
           
           echo "✅ File permission check complete"
 
-  # Run simulation tests
-  simulation:
-    needs: [setup]
-    if: github.event.inputs.test_simulation == 'true'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        simulator: [verilator, icarus]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Check if simulator should run
-        id: check-simulator
+      # Simulation step
+      - name: Run simulation tests with Verilator
+        if: github.event.inputs.test_simulation == 'true' && (github.event.inputs.simulator == 'verilator' || github.event.inputs.simulator == 'both')
         run: |
-          if [ "${{ github.event.inputs.simulator }}" = "both" ]; then
-            echo "should-run=true" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.inputs.simulator }}" = "${{ matrix.simulator }}" ]; then
-            echo "should-run=true" >> $GITHUB_OUTPUT
-          else
-            echo "should-run=false" >> $GITHUB_OUTPUT
-          fi
-
-
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install cocotb pytest pytest-cov
-
-      - name: Install Graphviz (for synthesis reports)
-        run: |
-          sudo apt-get install -y graphviz
-          dot -V
-
-      - name: Run simulation tests with ${{ matrix.simulator }}
-        if: steps.check-simulator.outputs.should-run == 'true'
-        run: |
-          echo "🧪 Running simulation tests with ${{ matrix.simulator }}..."
+          echo "🧪 Running simulation tests with Verilator..."
+          
+          # Verify simulator is available
+          verilator --version
           
           # Check for testbench files and run actual tests
           if [ -d "tb" ]; then
@@ -333,13 +257,8 @@ jobs:
               echo "Running testbench Makefile..."
               cd tb
               
-              if [ "${{ matrix.simulator }}" = "verilator" ]; then
-                echo "Running Verilator tests..."
-                make verilator-test || echo "⚠️ Verilator tests failed"
-              elif [ "${{ matrix.simulator }}" = "icarus" ]; then
-                echo "Running Icarus tests..."
-                make icarus-test || echo "⚠️ Icarus tests failed"
-              fi
+              echo "Running Verilator tests..."
+              make verilator-test || echo "⚠️ Verilator tests failed"
               
               cd ..
             else
@@ -361,168 +280,143 @@ jobs:
             echo "ℹ️ No testbench directory found"
           fi
           
-          echo "✅ Simulation test execution complete"
+          echo "✅ Verilator simulation test execution complete"
 
-  # Run synthesis tests
-  synthesis:
-    needs: [setup]
-    if: github.event.inputs.test_synthesis == 'true'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        platform: [asic, fpga]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Check if platform should run
-        id: check-platform
+      - name: Run simulation tests with Icarus
+        if: github.event.inputs.test_simulation == 'true' && (github.event.inputs.simulator == 'icarus' || github.event.inputs.simulator == 'both')
         run: |
-          if [ "${{ github.event.inputs.target_platform }}" = "both" ]; then
-            echo "should-run=true" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.inputs.target_platform }}" = "${{ matrix.platform }}" ]; then
-            echo "should-run=true" >> $GITHUB_OUTPUT
+          echo "🧪 Running simulation tests with Icarus..."
+          
+          # Verify simulator is available
+          iverilog -V
+          
+          # Check for testbench files and run actual tests
+          if [ -d "tb" ]; then
+            echo "Found testbench directory"
+            
+            # Run the testbench Makefile
+            if [ -f "tb/Makefile" ]; then
+              echo "Running testbench Makefile..."
+              cd tb
+              
+              echo "Running Icarus tests..."
+              make icarus-test || echo "⚠️ Icarus tests failed"
+              
+              cd ..
+            else
+              echo "⚠️ No Makefile found in tb directory"
+            fi
+            
+            # Look for SystemVerilog testbenches
+            sv_tb_files=$(find tb -name "tb_*.sv" -type f)
+            if [ -n "$sv_tb_files" ]; then
+              echo "Found SystemVerilog testbenches: $sv_tb_files"
+            fi
+            
+            # Look for cocotb testbenches
+            cocotb_files=$(find tb -name "test_*.py" -type f)
+            if [ -n "$cocotb_files" ]; then
+              echo "Found cocotb testbenches: $cocotb_files"
+            fi
           else
-            echo "should-run=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No testbench directory found"
           fi
+          
+          echo "✅ Icarus simulation test execution complete"
 
-      - name: Check synthesis configuration for ${{ matrix.platform }}
-        if: steps.check-platform.outputs.should-run == 'true'
+      # Synthesis step
+      - name: Run ASIC synthesis
+        if: github.event.inputs.test_synthesis == 'true' && (github.event.inputs.target_platform == 'asic' || github.event.inputs.target_platform == 'both')
         run: |
-          echo "🔧 Checking synthesis configuration for ${{ matrix.platform }}..."
+          echo "🔧 Running ASIC synthesis..."
           
-          if [ "${{ matrix.platform }}" = "asic" ]; then
-            if [ -d "flow/yosys" ]; then
-              echo "✅ Found Yosys configuration for ASIC"
-              cd flow/yosys
-              
-              # Run synthesis for all implementations
-              echo "Running ASIC synthesis..."
-              make all || echo "⚠️ ASIC synthesis failed"
-              
-              # Run gate analysis
-              echo "Running gate analysis..."
-              make gate_analysis || echo "⚠️ Gate analysis failed"
-              
-              # Generate comprehensive report
-              echo "Generating comprehensive report..."
-              make comprehensive_report || echo "⚠️ Report generation failed"
-              
-              # Copy reports to public directory
-              mkdir -p ../../public/asic
-              cp comprehensive_report.md ../../public/asic/ || true
-              cp gate_analysis_report.md ../../public/asic/ || true
-              cp synthesis_report.md ../../public/asic/ || true
-              
-              cd ../../
-            else
-              echo "⚠️ No Yosys configuration found for ASIC"
-              mkdir -p public/asic
-              echo "# ASIC Synthesis Report" > public/asic/README.md
-              echo "No ASIC synthesis configuration found." >> public/asic/README.md
-            fi
-          elif [ "${{ matrix.platform }}" = "fpga" ]; then
-            if [ -d "flow/fpga" ]; then
-              echo "✅ Found Yosys configuration for FPGA"
-              cd flow/fpga
-              
-              # Run FPGA synthesis
-              echo "Running FPGA synthesis..."
-              make all || echo "⚠️ FPGA synthesis failed"
-              
-              # Run FPGA analysis
-              echo "Running FPGA analysis..."
-              make fpga_analysis || echo "⚠️ FPGA analysis failed"
-              
-              # Generate comprehensive report
-              echo "Generating comprehensive FPGA report..."
-              make comprehensive_report || echo "⚠️ FPGA report generation failed"
-              
-              # Copy reports to public directory
-              mkdir -p ../../public/fpga
-              cp comprehensive_fpga_report.md ../../public/fpga/ || true
-              cp fpga_resource_analysis_report.md ../../public/fpga/ || true
-              
-              cd ../../
-            else
-              echo "⚠️ No Yosys configuration found for FPGA"
-              mkdir -p public/fpga
-              echo "# FPGA Synthesis Report" > public/fpga/README.md
-              echo "No FPGA synthesis configuration found." >> public/fpga/README.md
-            fi
+          if [ -d "flow/yosys" ]; then
+            echo "✅ Found Yosys configuration for ASIC"
+            cd flow/yosys
+            
+            # Run synthesis for all implementations
+            echo "Running ASIC synthesis..."
+            make all || echo "⚠️ ASIC synthesis failed"
+            
+            # Run gate analysis
+            echo "Running gate analysis..."
+            make gate_analysis || echo "⚠️ Gate analysis failed"
+            
+            # Generate comprehensive report
+            echo "Generating comprehensive report..."
+            make comprehensive_report || echo "⚠️ Report generation failed"
+            
+            # Copy reports to public directory
+            mkdir -p ../../public/asic
+            cp comprehensive_report.md ../../public/asic/ || true
+            cp gate_analysis_report.md ../../public/asic/ || true
+            cp synthesis_report.md ../../public/asic/ || true
+            
+            cd ../../
+          else
+            echo "⚠️ No Yosys configuration found for ASIC"
+            mkdir -p public/asic
+            echo "# ASIC Synthesis Report" > public/asic/README.md
+            echo "No ASIC synthesis configuration found." >> public/asic/README.md
           fi
           
-          echo "✅ Synthesis configuration check complete"
+          echo "✅ ASIC synthesis complete"
 
+      - name: Run FPGA synthesis
+        if: github.event.inputs.test_synthesis == 'true' && (github.event.inputs.target_platform == 'fpga' || github.event.inputs.target_platform == 'both')
+        run: |
+          echo "🔧 Running FPGA synthesis..."
+          
+          if [ -d "flow/fpga" ]; then
+            echo "✅ Found Yosys configuration for FPGA"
+            cd flow/fpga
+            
+            # Run FPGA synthesis
+            echo "Running FPGA synthesis..."
+            make all || echo "⚠️ FPGA synthesis failed"
+            
+            # Run FPGA analysis
+            echo "Running FPGA analysis..."
+            make fpga_analysis || echo "⚠️ FPGA analysis failed"
+            
+            # Generate comprehensive report
+            echo "Generating comprehensive FPGA report..."
+            make comprehensive_report || echo "⚠️ FPGA report generation failed"
+            
+            # Copy reports to public directory
+            mkdir -p ../../public/fpga
+            cp comprehensive_fpga_report.md ../../public/fpga/ || true
+            cp fpga_resource_analysis_report.md ../../public/fpga/ || true
+            
+            cd ../../
+          else
+            echo "⚠️ No Yosys configuration found for FPGA"
+            mkdir -p public/fpga
+            echo "# FPGA Synthesis Report" > public/fpga/README.md
+            echo "No FPGA synthesis configuration found." >> public/fpga/README.md
+          fi
+          
+          echo "✅ FPGA synthesis complete"
+
+      # Upload artifacts
       - name: Upload Synthesis Reports as Artifacts
-        if: steps.check-platform.outputs.should-run == 'true'
+        if: github.event.inputs.test_synthesis == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: synthesis-reports-${{ matrix.platform }}
+          name: synthesis-reports
           path: |
             public/asic/
             public/fpga/
 
-# Deploy job for GitHub Pages
-  deploy-pages:
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-    needs: [synthesis]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Create public directory structure
-        run: |
-          mkdir -p public/asic public/fpga
-          echo "# Synthesis Reports" > public/index.html
-          echo "## ASIC Reports" >> public/index.html
-          echo "Available at: [ASIC Reports](./asic/)" >> public/index.html
-          echo "## FPGA Reports" >> public/index.html
-          echo "Available at: [FPGA Reports](./fpga/)" >> public/index.html
-      - name: Download synthesis artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: synthesis-reports-asic
-          path: public/asic
-          if-no-files-found: warn
-      - name: Download FPGA artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: synthesis-reports-fpga
-          path: public/fpga
-          if-no-files-found: warn
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          publish_dir: ./public
-          publish_branch: gh-pages
-          force_orphan: true
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          # Enable GitHub Pages if not already enabled
-          enable_jekyll: false
-          # Add a .nojekyll file to bypass Jekyll processing
-          cname: ''
-
-  # Generate test report
-  report:
-    needs: [validate, lint, simulation, synthesis]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
+      # Generate test report
       - name: Generate test report
+        if: always()
         run: |
           echo "📊 Test Report"
           echo "=============="
           echo "Repository: ${{ github.repository }}"
           echo "Workflow: ${{ github.workflow }}"
           echo "Run ID: ${{ github.run_id }}"
-          echo ""
-          echo "Test Results:"
-          echo "- Validation: ${{ needs.validate.result == 'success' && '✅ PASSED' || needs.validate.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED' }}"
-          echo "- Linting: ${{ needs.lint.result == 'success' && '✅ PASSED' || needs.lint.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED' }}"
-          echo "- Simulation: ${{ needs.simulation.result == 'success' && '✅ PASSED' || needs.simulation.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED' }}"
-          echo "- Synthesis: ${{ needs.synthesis.result == 'success' && '✅ PASSED' || needs.synthesis.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED' }}"
           echo ""
           echo "Workflow Configuration:"
           echo "- Test Validation: ${{ github.event.inputs.test_validation || 'true' }}"
@@ -534,41 +428,17 @@ jobs:
           echo ""
           echo "Note: This is a template repository. Actual tests require IP-specific implementation."
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
+      # Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.event.inputs.test_synthesis == 'true'
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: test-results-${{ github.run_id }}
-          path: |
-            test-results/
-          retention-days: 7
-
-  # Final status
-  status:
-    needs: [validate, lint, simulation, synthesis, report]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Workflow status
-        run: |
-          echo "🎉 Workflow completed!"
-          echo "Repository: ${{ github.repository }}"
-          echo "Workflow: ${{ github.workflow }}"
-          echo "Run ID: ${{ github.run_id }}"
-          echo ""
-          echo "Job Results Summary:"
-          echo "- Validation: ${{ needs.validate.result }}"
-          echo "- Linting: ${{ needs.lint.result }}"
-          echo "- Simulation: ${{ needs.simulation.result }}"
-          echo "- Synthesis: ${{ needs.synthesis.result }}"
-          echo "- Report: ${{ needs.report.result }}"
-          echo ""
-          echo "This template repository is ready for IP development."
-          echo ""
-          echo "Next steps:"
-          echo "1. Use 'Use this template' to create a new repository"
-          echo "2. Clone your new repository"
-          echo "3. Run 'vyges init --interactive' to set up your IP"
-          echo "4. Add your RTL and testbenches"
-          echo "5. Enable this workflow in your new repository" 
+          publish_dir: ./public
+          publish_branch: gh-pages
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          enable_jekyll: false
+          cname: '' 
 
  
