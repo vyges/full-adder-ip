@@ -263,8 +263,11 @@ jobs:
               echo "Running testbench Makefile..."
               cd tb
               
-              echo "Running Verilator tests..."
-              make verilator-test
+              echo "Running SystemVerilog tests with Verilator..."
+              make test_basic TESTBENCH_TYPE=sv SIM=verilator
+              
+              echo "Running UVM tests with Verilator..."
+              make test_basic TESTBENCH_TYPE=uvm SIM=verilator
               
               cd ..
             else
@@ -305,8 +308,11 @@ jobs:
               echo "Running testbench Makefile..."
               cd tb
               
-              echo "Running Icarus tests..."
-              make icarus-test
+              echo "Running SystemVerilog tests with Icarus..."
+              make test_basic TESTBENCH_TYPE=sv SIM=icarus
+              
+              echo "Running UVM tests with Icarus..."
+              make test_basic TESTBENCH_TYPE=uvm SIM=icarus
               
               cd ..
             else
