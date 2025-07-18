@@ -519,22 +519,32 @@ jobs:
 
 # Deploy job for GitHub Pages
   deploy-pages:
-    if: github.ref == 'refs/heads/main' && always()
+    if: github.ref == 'refs/heads/main' && needs.synthesis.result == 'success'
     needs: [synthesis]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Create public directory structure
+        run: |
+          mkdir -p public/asic public/fpga
+          echo "# Synthesis Reports" > public/index.html
+          echo "## ASIC Reports" >> public/index.html
+          echo "Available at: [ASIC Reports](./asic/)" >> public/index.html
+          echo "## FPGA Reports" >> public/index.html
+          echo "Available at: [FPGA Reports](./fpga/)" >> public/index.html
       - name: Download synthesis artifacts
         uses: actions/download-artifact@v4
         with:
           name: synthesis-reports-asic
           path: public/asic
+          if-no-files-found: warn
       - name: Download FPGA artifacts
         uses: actions/download-artifact@v4
         with:
           name: synthesis-reports-fpga
           path: public/fpga
+          if-no-files-found: warn
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -543,6 +553,10 @@ jobs:
           force_orphan: true
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
+          # Enable GitHub Pages if not already enabled
+          enable_jekyll: false
+          # Add a .nojekyll file to bypass Jekyll processing
+          cname: ''
 
   # Generate test report
   report:
