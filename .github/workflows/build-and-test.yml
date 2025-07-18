@@ -342,7 +342,11 @@ jobs:
             
             # Run cocotb tests
             echo "Running cocotb tests..."
-            make test || echo "⚠️ cocotb tests failed"
+            make test_all_implementations SIM=icarus || echo "⚠️ cocotb tests failed"
+            
+            # Also run with Verilator if available
+            echo "Running cocotb tests with Verilator..."
+            make test_all_implementations SIM=verilator || echo "⚠️ cocotb Verilator tests failed"
             
             cd ../..
           else
@@ -636,29 +640,53 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Create or update gh-pages branch
-          echo "Checking for gh-pages branch..."
+          # Create a clean working directory for deployment
+          echo "Setting up clean deployment environment..."
+          
+          # Check if gh-pages branch exists
           if git ls-remote --heads origin gh-pages | grep gh-pages; then
-            echo "gh-pages branch exists, updating..."
-            git fetch origin gh-pages
-            git checkout gh-pages
-            git pull origin gh-pages
+            echo "gh-pages branch exists, creating clean checkout..."
+            # Create a temporary directory for deployment
+            mkdir -p /tmp/gh-pages-deploy
+            cd /tmp/gh-pages-deploy
+            
+            # Clone the gh-pages branch (shallow clone for speed)
+            git clone --branch gh-pages --single-branch --depth=1 https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git .
+            
+            # Remove all existing files
+            git rm -rf . || true
+            
+            # Copy new files from the original workspace
+            cp -r ${{ github.workspace }}/public/* .
+            
+            # Commit and push
+            git add .
+            git commit -m "Update synthesis reports - $(date -u)" || echo "No changes to commit"
+            git push origin gh-pages
+            
+            echo "✅ GitHub Pages deployment complete!"
           else
             echo "gh-pages branch not found, creating new one..."
-            git checkout --orphan gh-pages
+            # Create a temporary directory for deployment
+            mkdir -p /tmp/gh-pages-deploy
+            cd /tmp/gh-pages-deploy
+            
+            # Initialize new repository
+            git init
+            git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            
+            # Copy files from the original workspace
+            cp -r ${{ github.workspace }}/public/* .
+            
+            # Create and push gh-pages branch
+            git add .
+            git commit -m "Initial synthesis reports - $(date -u)"
+            git branch -M gh-pages
+            git push -u origin gh-pages
+            
+            echo "✅ GitHub Pages deployment complete!"
           fi
           
-          # Remove all existing files and copy new ones
-          git rm -rf . || true
-          cp -r public/* .
-          
-          # Commit and push with proper authentication
-          git add .
-          git commit -m "Update synthesis reports - $(date -u)" || echo "No changes to commit"
-          echo "Pushing to gh-pages branch..."
-          git push origin gh-pages
-          
-          echo "✅ GitHub Pages deployment complete!"
           echo "📖 Reports available at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" 
 
  
