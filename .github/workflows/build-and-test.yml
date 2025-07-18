@@ -264,7 +264,7 @@ jobs:
               cd tb
               
               echo "Running Verilator tests..."
-              make verilator-test || echo "⚠️ Verilator tests failed"
+              make verilator-test
               
               cd ..
             else
@@ -306,7 +306,7 @@ jobs:
               cd tb
               
               echo "Running Icarus tests..."
-              make icarus-test || echo "⚠️ Icarus tests failed"
+              make icarus-test
               
               cd ..
             else
@@ -340,13 +340,13 @@ jobs:
             echo "Found cocotb test directory"
             cd tb/cocotb
             
-            # Run cocotb tests
+            # Run cocotb tests - fail the build if tests fail
             echo "Running cocotb tests..."
-            make test_all_implementations SIM=icarus || echo "⚠️ cocotb tests failed"
+            make test_all_implementations SIM=icarus
             
             # Also run with Verilator if available
             echo "Running cocotb tests with Verilator..."
-            make test_all_implementations SIM=verilator || echo "⚠️ cocotb Verilator tests failed"
+            make test_all_implementations SIM=verilator
             
             cd ../..
           else

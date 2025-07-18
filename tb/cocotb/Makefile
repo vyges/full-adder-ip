@@ -25,23 +25,19 @@ include $(shell cocotb-config --makefiles)/Makefile.sim
 
 # Additional simulator-specific settings
 ifeq ($(SIM),icarus)
-    # Icarus Verilog settings
-    COMPILE_ARGS += -I $(RTL_DIR)
-    VERILOG_SOURCES += $(RTL_DIR)/$(TOPLEVEL).v
+    # Icarus Verilog settings - compile only the specific file
+    VERILOG_SOURCES = $(RTL_DIR)/$(TOPLEVEL).v
 else ifeq ($(SIM),verilator)
     # Verilator settings - specify the exact file to compile
-    COMPILE_ARGS += -I $(RTL_DIR)
     VERILOG_SOURCES = $(RTL_DIR)/$(TOPLEVEL).v
     EXTRA_ARGS += --trace --trace-structs
 else ifeq ($(SIM),questa)
     # Questa/ModelSim settings
-    COMPILE_ARGS += -I $(RTL_DIR)
-    VERILOG_SOURCES += $(RTL_DIR)/$(TOPLEVEL).v
+    VERILOG_SOURCES = $(RTL_DIR)/$(TOPLEVEL).v
     EXTRA_ARGS += -do "run -all; quit"
 else ifeq ($(SIM),vcs)
     # VCS settings
-    COMPILE_ARGS += -I $(RTL_DIR)
-    VERILOG_SOURCES += $(RTL_DIR)/$(TOPLEVEL).v
+    VERILOG_SOURCES = $(RTL_DIR)/$(TOPLEVEL).v
     EXTRA_ARGS += -full64
 endif
 
