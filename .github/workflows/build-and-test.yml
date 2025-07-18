@@ -387,8 +387,10 @@ jobs:
               cp gate_analysis_report.md ../../public/asic/ || true
               cd ../../
             else
-              echo "❌ No Yosys configuration found for ASIC"
-              exit 1
+              echo "⚠️ No Yosys configuration found for ASIC (expected for template)"
+              mkdir -p public/asic
+              echo "# ASIC Synthesis Report" > public/asic/README.md
+              echo "This is a template repository. Add your ASIC synthesis configuration to enable reports." >> public/asic/README.md
             fi
           elif [ "${{ matrix.platform }}" = "fpga" ]; then
             if [ -d "flow/fpga" ]; then
@@ -402,8 +404,10 @@ jobs:
               cp fpga_resource_analysis_report.md ../../public/fpga/ || true
               cd ../../
             else
-              echo "❌ No Yosys configuration found for FPGA"
-              exit 1
+              echo "⚠️ No Yosys configuration found for FPGA (expected for template)"
+              mkdir -p public/fpga
+              echo "# FPGA Synthesis Report" > public/fpga/README.md
+              echo "This is a template repository. Add your FPGA synthesis configuration to enable reports." >> public/fpga/README.md
             fi
           fi
           
@@ -420,7 +424,7 @@ jobs:
 
 # Deploy job for GitHub Pages
   deploy-pages:
-    if: github.ref == 'refs/heads/main' && needs.synthesis.result == 'success'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     needs: [synthesis]
     runs-on: ubuntu-latest
     steps:
