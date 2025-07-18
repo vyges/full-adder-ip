@@ -64,7 +64,7 @@ on:
 jobs:
   # Setup environment
   setup:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -121,12 +121,6 @@ jobs:
             libboost-python-dev \
             libboost-filesystem-dev
 
-      - name: Install KLayout (AppImage)
-        run: |
-          wget https://www.klayout.org/downloads/ubuntu22_04/klayout_0.30.2-1_amd64.deb
-          sudo apt-get install -y ./klayout_0.30.2-1_amd64.deb
-          klayout -v
-
       - name: Install Yosys from source
         run: |
           echo "🔧 Installing Yosys from source..."
@@ -179,26 +173,6 @@ jobs:
           # Verify installation
           verilator --version
 
-      - name: Install OpenROAD tools
-        run: |
-          echo "🔧 Installing OpenROAD tools..."
-          
-          # Clone OpenROAD-flow-scripts repository
-          git clone https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts.git
-          cd OpenROAD-flow-scripts
-          
-          # Build OpenROAD tools (this includes TritonFPlan, RePlAce, TritonCTS, FastRoute, TritonRoute)
-          ./build_openroad.sh
-          
-          # Add OpenROAD tools to PATH
-          echo 'export PATH=$PATH:'$(pwd)'/tools/OpenROAD/build/src' >> $GITHUB_ENV
-          echo 'export PATH=$PATH:'$(pwd)'/tools/RePlAce/build/RePlAce' >> $GITHUB_ENV
-          echo 'export PATH=$PATH:'$(pwd)'/tools/FastRoute/build/FastRoute' >> $GITHUB_ENV
-          
-          # Verify installations
-          echo "✅ OpenROAD tools installed"
-          echo "Note: These tools are now available for the ASIC design flow"
-
       - name: Install GHDL Yosys plugin
         run: |
           echo "🔧 Installing GHDL Yosys plugin..."
@@ -219,27 +193,6 @@ jobs:
           # Verify installation
           echo "✅ GHDL Yosys plugin installed"
           echo "Note: VHDL synthesis support is now available in Yosys"
-
-      - name: Install Open PDKs
-        run: |
-          echo "🔧 Installing Open PDKs..."
-          
-          # Clone Open PDKs repository
-          git clone https://github.com/RTimothyEdwards/open_pdks.git
-          cd open_pdks
-          
-          # Install Open PDKs (includes sky130, gf180mcu, etc.)
-          ./configure --enable-sky130-pdk --enable-gf180mcu-pdk
-          make
-          sudo make install
-          
-          # Set PDK_ROOT environment variable
-          echo 'export PDK_ROOT=/usr/local/share/pdk' >> $GITHUB_ENV
-          
-          # Verify installation
-          echo "✅ Open PDKs installed"
-          echo "Available PDKs: sky130, gf180mcu"
-          echo "PDK_ROOT set to: /usr/local/share/pdk"
 
       - name: Install Icarus Verilog (if selected)
         if: ${{ github.event.inputs.simulator == 'icarus' || github.event.inputs.simulator == 'both' }}
