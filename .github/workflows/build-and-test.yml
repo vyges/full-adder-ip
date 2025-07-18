@@ -65,6 +65,10 @@ jobs:
   # Main build and test job - everything runs sequentially on one runner
   build-and-test:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -492,17 +496,15 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Set up authentication using GITHUB_TOKEN
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          
           # Create or update gh-pages branch
+          echo "Checking for gh-pages branch..."
           if git ls-remote --heads origin gh-pages | grep gh-pages; then
             echo "gh-pages branch exists, updating..."
             git fetch origin gh-pages
             git checkout gh-pages
             git pull origin gh-pages
           else
-            echo "Creating new gh-pages branch..."
+            echo "gh-pages branch not found, creating new one..."
             git checkout --orphan gh-pages
           fi
           
@@ -510,9 +512,10 @@ jobs:
           git rm -rf . || true
           cp -r public/* .
           
-          # Commit and push
+          # Commit and push with proper authentication
           git add .
           git commit -m "Update synthesis reports - $(date -u)" || echo "No changes to commit"
+          echo "Pushing to gh-pages branch..."
           git push origin gh-pages
           
           echo "✅ GitHub Pages deployment complete!"
