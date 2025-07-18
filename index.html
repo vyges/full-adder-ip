@@ -5,56 +5,199 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Full Adder IP - Reports</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { color: #0366d6; border-bottom: 1px solid #e1e4e8; padding-bottom: 10px; }
-        h2 { color: #24292e; margin-top: 30px; }
-        .report-section { background: #f6f8fa; padding: 20px; border-radius: 6px; margin: 20px 0; }
-        .report-link { display: inline-block; background: #0366d6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin: 10px 5px; }
-        .report-link:hover { background: #0256cc; }
-        .report-link.test { background: #28a745; }
-        .report-link.test:hover { background: #218838; }
-        .timestamp { color: #586069; font-size: 14px; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6;
+            color: #24292e;
+        }
+        h1 { 
+            color: #0366d6; 
+            border-bottom: 2px solid #e1e4e8; 
+            padding-bottom: 10px; 
+            margin-top: 0;
+        }
+        h2 { 
+            color: #24292e; 
+            margin-top: 30px; 
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 5px;
+        }
+        .timestamp { 
+            color: #586069; 
+            font-size: 14px; 
+            margin-bottom: 30px;
+        }
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        th, td { 
+            border: 1px solid #e1e4e8; 
+            padding: 16px; 
+            text-align: left; 
+            vertical-align: top;
+        }
+        th { 
+            background-color: #f6f8fa; 
+            font-weight: 600;
+            color: #24292e;
+        }
+        tr:nth-child(even) { 
+            background-color: #f8f9fa; 
+        }
+        tr:hover { 
+            background-color: #f1f3f4; 
+        }
+        .report-link { 
+            display: inline-block; 
+            background: #0366d6; 
+            color: white; 
+            padding: 6px 12px; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            margin: 2px 4px 2px 0;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .report-link:hover { 
+            background: #0256cc; 
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .report-link.html { 
+            background: #28a745; 
+        }
+        .report-link.html:hover { 
+            background: #218838; 
+        }
+        .report-link.md { 
+            background: #6f42c1; 
+        }
+        .report-link.md:hover { 
+            background: #5a32a3; 
+        }
+        .category-header {
+            background: #f6f8fa;
+            font-weight: 600;
+            color: #24292e;
+            border-left: 4px solid #0366d6;
+        }
+        .summary-box {
+            background: #f8f9fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .summary-box h3 {
+            margin-top: 0;
+            color: #0366d6;
+        }
+        .summary-list {
+            list-style: none;
+            padding: 0;
+        }
+        .summary-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+        .summary-list li:last-child {
+            border-bottom: none;
+        }
+        .summary-list strong {
+            color: #24292e;
+        }
     </style>
 </head>
 <body>
     <h1>🔧 Full Adder IP - Comprehensive Reports</h1>
-    <p class="timestamp">Generated: Fri Jul 18 08:09:54 UTC 2025</p>
+    <p class="timestamp">Generated: Fri Jul 18 17:27:38 UTC 2025</p>
     
-    <div class="report-section">
-        <h2>🧪 Test Harness Report</h2>
-        <p>Comprehensive test results including simulation, synthesis, and validation reports for all implementations.</p>
-        <a href="./test_harness_report.html" class="report-link test">📋 Test Harness Report (HTML)</a>
-        <a href="./test_harness_report.md" class="report-link test">📋 Test Harness Report (Markdown)</a>
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 25%;">Report Name</th>
+                <th style="width: 50%;">Description</th>
+                <th style="width: 25%;">Reports</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="category-header">
+                <td colspan="3">🧪 Test & Verification</td>
+            </tr>
+            <tr>
+                <td><strong>Test Harness Report</strong></td>
+                <td>Comprehensive test results including simulation, synthesis, and validation reports for all three implementations (carry lookahead, simple XOR/AND, and half adder modular).</td>
+                <td>
+                    <a href="./test_harness_report.html" class="report-link html">HTML</a>
+                    <a href="./test_harness_report.md" class="report-link md">Markdown</a>
+                </td>
+            </tr>
+            
+            <tr class="category-header">
+                <td colspan="3">📊 ASIC Synthesis & Analysis</td>
+            </tr>
+            <tr>
+                <td><strong>Comprehensive ASIC Report</strong></td>
+                <td>Complete ASIC synthesis analysis including gate counts, transistor analysis, and performance metrics for all implementations.</td>
+                <td>
+                    <a href="./asic/comprehensive_report.html" class="report-link html">HTML</a>
+                    <a href="./asic/comprehensive_report.md" class="report-link md">Markdown</a>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Gate Analysis Report</strong></td>
+                <td>Detailed gate-level analysis showing primitive gate counts, transistor estimates, and design style comparisons.</td>
+                <td>
+                    <a href="./asic/gate_analysis_report.html" class="report-link html">HTML</a>
+                    <a href="./asic/gate_analysis_report.md" class="report-link md">Markdown</a>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Synthesis Report</strong></td>
+                <td>Yosys synthesis results including netlist generation, technology mapping, and optimization statistics.</td>
+                <td>
+                    <a href="./asic/synthesis_report.html" class="report-link html">HTML</a>
+                    <a href="./asic/synthesis_report.md" class="report-link md">Markdown</a>
+                </td>
+            </tr>
+            
+            <tr class="category-header">
+                <td colspan="3">🔌 FPGA Synthesis & Analysis</td>
+            </tr>
+            <tr>
+                <td><strong>Comprehensive FPGA Report</strong></td>
+                <td>Complete FPGA resource utilization analysis and synthesis results for Xilinx 7-series devices.</td>
+                <td>
+                    <a href="./fpga/comprehensive_fpga_report.html" class="report-link html">HTML</a>
+                    <a href="./fpga/comprehensive_fpga_report.md" class="report-link md">Markdown</a>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>FPGA Resource Analysis</strong></td>
+                <td>Detailed LUT, flip-flop, and resource utilization analysis for FPGA implementations.</td>
+                <td>
+                    <a href="./fpga/fpga_resource_analysis_report.html" class="report-link html">HTML</a>
+                    <a href="./fpga/fpga_resource_analysis_report.md" class="report-link md">Markdown</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
     
-    <div class="report-section">
-        <h2>📊 ASIC Synthesis Reports</h2>
-        <p>Comprehensive analysis of ASIC implementations including gate counts, transistor analysis, and synthesis results.</p>
-        <a href="./asic/comprehensive_report.html" class="report-link">📋 Comprehensive Report (HTML)</a>
-        <a href="./asic/gate_analysis_report.html" class="report-link">🔢 Gate Analysis (HTML)</a>
-        <a href="./asic/synthesis_report.html" class="report-link">⚡ Synthesis Report (HTML)</a>
-        <br><br>
-        <a href="./asic/comprehensive_report.md" class="report-link">📋 Comprehensive Report (Markdown)</a>
-        <a href="./asic/gate_analysis_report.md" class="report-link">🔢 Gate Analysis (Markdown)</a>
-        <a href="./asic/synthesis_report.md" class="report-link">⚡ Synthesis Report (Markdown)</a>
-    </div>
-    
-    <div class="report-section">
-        <h2>🔌 FPGA Synthesis Reports</h2>
-        <p>FPGA resource utilization analysis and synthesis results for Xilinx 7-series devices.</p>
-        <a href="./fpga/comprehensive_fpga_report.html" class="report-link">📋 Comprehensive Report (HTML)</a>
-        <a href="./fpga/fpga_resource_analysis_report.html" class="report-link">🔢 Resource Analysis (HTML)</a>
-        <br><br>
-        <a href="./fpga/comprehensive_fpga_report.md" class="report-link">📋 Comprehensive Report (Markdown)</a>
-        <a href="./fpga/fpga_resource_analysis_report.md" class="report-link">🔢 Resource Analysis (Markdown)</a>
-    </div>
-    
-    <div class="report-section">
-        <h2>📈 Implementation Summary</h2>
-        <ul>
-            <li><strong>Carry Lookahead:</strong> 5 gates, 32 transistors</li>
-            <li><strong>Simple XOR/AND:</strong> 5 gates, 32 transistors</li>
-            <li><strong>Half Adder:</strong> 7 gates, 48 transistors</li>
+    <div class="summary-box">
+        <h3>📈 Implementation Summary</h3>
+        <ul class="summary-list">
+            <li><strong>Carry Lookahead:</strong> 5 gates, 32 transistors (Recommended for multi-bit adders)</li>
+            <li><strong>Simple XOR/AND:</strong> 5 gates, 32 transistors (Most efficient for single instances)</li>
+            <li><strong>Half Adder Modular:</strong> 7 gates, 48 transistors (Educational hierarchical design)</li>
         </ul>
     </div>
 </body>
