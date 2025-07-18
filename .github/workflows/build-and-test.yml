@@ -62,31 +62,8 @@ on:
 # and when explicitly enabled by repository maintainers
 
 jobs:
-  # Check if workflow should run
-  check-enabled:
-    runs-on: ubuntu-latest
-    outputs:
-      should-run: ${{ steps.check.outputs.should-run }}
-    steps:
-      - name: Check if workflow is enabled
-        id: check
-        run: |
-          # This workflow is disabled by default
-          # Repository maintainers can enable it by setting this environment variable
-          # or by modifying this check
-          if [ "${{ secrets.ENABLE_BUILD_TEST }}" = "true" ]; then
-            echo "should-run=true" >> $GITHUB_OUTPUT
-            echo "✅ Workflow enabled via repository secret"
-          else
-            echo "should-run=false" >> $GITHUB_OUTPUT
-            echo "⚠️ This workflow is disabled by default"
-            echo "To enable: Set ENABLE_BUILD_TEST=true in repository secrets"
-          fi
-
   # Setup environment
   setup:
-    needs: check-enabled
-    if: needs.check-enabled.outputs.should-run == 'true'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -289,8 +266,8 @@ jobs:
 
   # Validate project structure
   validate:
-    needs: [check-enabled, setup]
-    if: needs.check-enabled.outputs.should-run == 'true' && github.event.inputs.test_validation == 'true'
+    needs: [setup]
+    if: github.event.inputs.test_validation == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -341,8 +318,8 @@ jobs:
 
   # Run linting checks
   lint:
-    needs: [check-enabled, setup]
-    if: needs.check-enabled.outputs.should-run == 'true' && github.event.inputs.test_linting == 'true'
+    needs: [setup]
+    if: github.event.inputs.test_linting == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -387,8 +364,8 @@ jobs:
 
   # Run simulation tests
   simulation:
-    needs: [check-enabled, setup]
-    if: needs.check-enabled.outputs.should-run == 'true' && github.event.inputs.test_simulation == 'true'
+    needs: [setup]
+    if: github.event.inputs.test_simulation == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -471,8 +448,8 @@ jobs:
 
   # Run synthesis tests
   synthesis:
-    needs: [check-enabled, setup]
-    if: needs.check-enabled.outputs.should-run == 'true' && github.event.inputs.test_synthesis == 'true'
+    needs: [setup]
+    if: github.event.inputs.test_synthesis == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -533,7 +510,7 @@ jobs:
 
       - name: Upload Synthesis Reports as Artifacts
         if: steps.check-platform.outputs.should-run == 'true'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: synthesis-reports-${{ matrix.platform }}
           path: |
@@ -549,19 +526,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Download synthesis artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: synthesis-reports-asic
           path: public/asic
       - name: Download FPGA artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: synthesis-reports-fpga
           path: public/fpga
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
           publish_branch: gh-pages
           force_orphan: true
@@ -570,8 +546,8 @@ jobs:
 
   # Generate test report
   report:
-    needs: [check-enabled, validate, lint, simulation, synthesis]
-    if: needs.check-enabled.outputs.should-run == 'true'
+    needs: [validate, lint, simulation, synthesis]
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Generate test report
@@ -591,7 +567,7 @@ jobs:
           echo "Note: This is a template repository. Actual tests require IP-specific implementation."
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ github.run_id }}
           path: |
@@ -600,7 +576,7 @@ jobs:
 
   # Final status
   status:
-    needs: [check-enabled, validate, lint, simulation, synthesis, report]
+    needs: [validate, lint, simulation, synthesis, report]
     if: always()
     runs-on: ubuntu-latest
     steps:
