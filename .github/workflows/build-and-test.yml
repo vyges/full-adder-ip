@@ -27,7 +27,7 @@ on:
       test_synthesis:
         description: 'Run synthesis tests'
         required: false
-        default: false
+        default: true
         type: boolean
       test_linting:
         description: 'Run linting checks'
@@ -42,7 +42,7 @@ on:
       target_platform:
         description: 'Target platform (asic, fpga, or both)'
         required: false
-        default: 'asic'
+        default: 'both'
         type: choice
         options:
           - asic
@@ -51,7 +51,7 @@ on:
       simulator:
         description: 'Simulator to use'
         required: false
-        default: 'verilator'
+        default: 'both'
         type: choice
         options:
           - verilator
@@ -74,19 +74,9 @@ jobs:
         with:
           python-version: '3.8'
 
-      - name: Install system packages and setup repositories
+      - name: Install system packages
         run: |
-          # Install software-properties-common first (needed for add-apt-repository)
           sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          
-          # Add Yosys PPA
-          sudo add-apt-repository -y ppa:yosys/ppa
-          
-          # Update package list once after adding repository
-          sudo apt-get update
-          
-          # Install all remaining packages
           sudo apt-get install -y --no-install-recommends \
             build-essential \
             cmake \
@@ -124,7 +114,18 @@ jobs:
             xschem \
             ngspice \
             gettext \
-            gnat
+            gnat \
+            gperf \
+            libreadline-dev \
+            gawk \
+            tcl-dev \
+            libffi-dev \
+            graphviz \
+            xdot \
+            pkg-config \
+            libboost-system-dev \
+            libboost-python-dev \
+            libboost-filesystem-dev
 
       - name: Install KLayout (AppImage)
         run: |
@@ -132,9 +133,20 @@ jobs:
           sudo apt-get install -y ./klayout_0.30.2-1_amd64.deb
           klayout -v
 
-      - name: Install Yosys (nightly PPA)
+      - name: Install Yosys from source
         run: |
-          sudo apt-get install -y yosys
+          echo "🔧 Installing Yosys from source..."
+          
+          # Clone Yosys repository
+          git clone https://github.com/YosysHQ/yosys.git
+          cd yosys
+          
+          # Build and install Yosys
+          make config-gcc
+          make -j$(nproc)
+          sudo make install
+          
+          # Verify installation
           yosys -V
           yosys -m slang -p "slang_version"
           
@@ -152,6 +164,8 @@ jobs:
           
           # Verify ABC is available
           yosys -p "help abc" | grep -q "ABC" && echo "✅ ABC technology mapping available" || echo "❌ ABC not available"
+          
+          cd ..
 
       - name: Install Verilator 5.026
         run: |
