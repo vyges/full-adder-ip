@@ -585,8 +585,8 @@ jobs:
 
           
           # Convert test harness report to HTML
-          if [ -f "test_harness_report.md" ]; then
-            pandoc test_harness_report.md -o public/test_harness_report.html --css=report-style.css --standalone --metadata title="Vyges Full Adder IP - Test Harness Report" --include-after-body=public/vyges-footer.html
+          if [ -f "public/test_harness_report.md" ]; then
+            pandoc public/test_harness_report.md -o public/test_harness_report.html --css=public/report-style.css --standalone --metadata title="Vyges Full Adder IP - Test Harness Report" --include-after-body=public/vyges-footer.html
             echo "✅ Converted test harness report to HTML"
           fi
           
@@ -598,8 +598,8 @@ jobs:
               if [ -f "$file" ]; then
                 basename=$(basename "$file" .md)
                 echo "🔍 Debug: Converting $file to public/asic/${basename}.html"
-                echo "🔍 Debug: Footer path check: $(ls -la ../vyges-footer.html 2>/dev/null || echo 'Footer not found at ../vyges-footer.html')"
-                pandoc "$file" -o "public/asic/${basename}.html" --css=../report-style.css --standalone --metadata title="Vyges Full Adder IP - ${basename}" --include-after-body=../vyges-footer.html
+                echo "🔍 Debug: Footer path check: $(ls -la public/vyges-footer.html 2>/dev/null || echo 'Footer not found at public/vyges-footer.html')"
+                pandoc "$file" -o "public/asic/${basename}.html" --css=public/report-style.css --standalone --metadata title="Vyges Full Adder IP - ${basename}" --include-after-body=public/vyges-footer.html
                 echo "✅ Converted $file to HTML"
               fi
             done
@@ -613,8 +613,8 @@ jobs:
               if [ -f "$file" ]; then
                 basename=$(basename "$file" .md)
                 echo "🔍 Debug: Converting $file to public/fpga/${basename}.html"
-                echo "🔍 Debug: Footer path check: $(ls -la ../vyges-footer.html 2>/dev/null || echo 'Footer not found at ../vyges-footer.html')"
-                pandoc "$file" -o "public/fpga/${basename}.html" --css=../report-style.css --standalone --metadata title="Vyges Full Adder IP - ${basename}" --include-after-body=../vyges-footer.html
+                echo "🔍 Debug: Footer path check: $(ls -la public/vyges-footer.html 2>/dev/null || echo 'Footer not found at public/vyges-footer.html')"
+                pandoc "$file" -o "public/fpga/${basename}.html" --css=public/report-style.css --standalone --metadata title="Vyges Full Adder IP - ${basename}" --include-after-body=public/vyges-footer.html
                 echo "✅ Converted $file to HTML"
               fi
             done
