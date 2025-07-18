@@ -120,7 +120,8 @@ jobs:
             libboost-system-dev \
             libboost-python-dev \
             libboost-filesystem-dev \
-            verilator
+            verilator \
+            iverilog
 
       - name: Install Yosys from package
         run: |
@@ -144,16 +145,18 @@ jobs:
           echo "Testing Yosys basic functionality..."
           yosys -p "help" | head -5
 
-      - name: Install Icarus Verilog (if selected)
-        if: ${{ github.event.inputs.simulator == 'icarus' || github.event.inputs.simulator == 'both' }}
-        run: |
-          sudo apt-get install -y iverilog
-          iverilog -V
+
           
       - name: Install GTKWave (for waveform viewing)
         run: |
           sudo apt-get install -y gtkwave
           gtkwave --version
+
+      - name: Verify Icarus Verilog installation
+        run: |
+          echo "🔍 Verifying Icarus Verilog installation..."
+          iverilog -V
+          echo "✅ Icarus Verilog is available"
 
       - name: Install Python dependencies
         run: |
@@ -304,12 +307,7 @@ jobs:
             echo "should-run=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Install Icarus Verilog (if needed)
-        if: steps.check-simulator.outputs.should-run == 'true' && matrix.simulator == 'icarus'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y iverilog
-          iverilog -V
+
 
       - name: Install Python dependencies
         run: |
@@ -521,10 +519,18 @@ jobs:
           echo "Run ID: ${{ github.run_id }}"
           echo ""
           echo "Test Results:"
-          echo "- Validation: ${{ needs.validate.result == 'success' && '✅ PASSED' || '⏭️ SKIPPED' }}"
-          echo "- Linting: ${{ needs.lint.result == 'success' && '✅ PASSED' || '⏭️ SKIPPED' }}"
-          echo "- Simulation: ${{ needs.simulation.result == 'success' && '✅ PASSED' || '⏭️ SKIPPED' }}"
-          echo "- Synthesis: ${{ needs.synthesis.result == 'success' && '✅ PASSED' || '⏭️ SKIPPED' }}"
+          echo "- Validation: ${{ needs.validate.result == 'success' && '✅ PASSED' || needs.validate.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED' }}"
+          echo "- Linting: ${{ needs.lint.result == 'success' && '✅ PASSED' || needs.lint.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED' }}"
+          echo "- Simulation: ${{ needs.simulation.result == 'success' && '✅ PASSED' || needs.simulation.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED' }}"
+          echo "- Synthesis: ${{ needs.synthesis.result == 'success' && '✅ PASSED' || needs.synthesis.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED' }}"
+          echo ""
+          echo "Workflow Configuration:"
+          echo "- Test Validation: ${{ github.event.inputs.test_validation || 'true' }}"
+          echo "- Test Linting: ${{ github.event.inputs.test_linting || 'true' }}"
+          echo "- Test Simulation: ${{ github.event.inputs.test_simulation || 'true' }}"
+          echo "- Test Synthesis: ${{ github.event.inputs.test_synthesis || 'true' }}"
+          echo "- Target Platform: ${{ github.event.inputs.target_platform || 'both' }}"
+          echo "- Simulator: ${{ github.event.inputs.simulator || 'both' }}"
           echo ""
           echo "Note: This is a template repository. Actual tests require IP-specific implementation."
 
@@ -544,19 +550,25 @@ jobs:
     steps:
       - name: Workflow status
         run: |
-          if [ "${{ needs.check-enabled.outputs.should-run }}" = "true" ]; then
-            echo "🎉 Workflow completed successfully!"
-            echo "This template repository is ready for IP development."
-            echo ""
-            echo "Next steps:"
-            echo "1. Use 'Use this template' to create a new repository"
-            echo "2. Clone your new repository"
-            echo "3. Run 'vyges init --interactive' to set up your IP"
-            echo "4. Add your RTL and testbenches"
-            echo "5. Enable this workflow in your new repository"
-          else
-            echo "ℹ️ Workflow disabled - this is expected for the template repository"
-            echo "Enable this workflow in your IP repository after setup"
-          fi 
+          echo "🎉 Workflow completed!"
+          echo "Repository: ${{ github.repository }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo ""
+          echo "Job Results Summary:"
+          echo "- Validation: ${{ needs.validate.result }}"
+          echo "- Linting: ${{ needs.lint.result }}"
+          echo "- Simulation: ${{ needs.simulation.result }}"
+          echo "- Synthesis: ${{ needs.synthesis.result }}"
+          echo "- Report: ${{ needs.report.result }}"
+          echo ""
+          echo "This template repository is ready for IP development."
+          echo ""
+          echo "Next steps:"
+          echo "1. Use 'Use this template' to create a new repository"
+          echo "2. Clone your new repository"
+          echo "3. Run 'vyges init --interactive' to set up your IP"
+          echo "4. Add your RTL and testbenches"
+          echo "5. Enable this workflow in your new repository" 
 
  
