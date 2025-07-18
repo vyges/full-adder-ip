@@ -476,6 +476,11 @@ jobs:
           </div>
           EOF
           
+          echo "🔍 Debug: Current directory: $(pwd)"
+          echo "🔍 Debug: Directory structure:"
+          tree public/ || find public/ -type f
+          echo "🔍 Debug: Footer file exists: $(ls -la public/vyges-footer.html)"
+          
           python3 generate_test_harness_report.py
           
           # Copy report to public directory for GitHub Pages
@@ -587,9 +592,13 @@ jobs:
           
           # Convert ASIC reports to HTML
           if [ -d "public/asic" ]; then
+            echo "🔍 Debug: Converting ASIC reports from $(pwd)"
+            echo "🔍 Debug: ASIC files: $(ls public/asic/*.md 2>/dev/null || echo 'No ASIC markdown files')"
             for file in public/asic/*.md; do
               if [ -f "$file" ]; then
                 basename=$(basename "$file" .md)
+                echo "🔍 Debug: Converting $file to public/asic/${basename}.html"
+                echo "🔍 Debug: Footer path check: $(ls -la ../vyges-footer.html 2>/dev/null || echo 'Footer not found at ../vyges-footer.html')"
                 pandoc "$file" -o "public/asic/${basename}.html" --css=../report-style.css --standalone --metadata title="Vyges Full Adder IP - ${basename}" --include-after-body=../vyges-footer.html
                 echo "✅ Converted $file to HTML"
               fi
@@ -598,9 +607,13 @@ jobs:
           
           # Convert FPGA reports to HTML
           if [ -d "public/fpga" ]; then
+            echo "🔍 Debug: Converting FPGA reports from $(pwd)"
+            echo "🔍 Debug: FPGA files: $(ls public/fpga/*.md 2>/dev/null || echo 'No FPGA markdown files')"
             for file in public/fpga/*.md; do
               if [ -f "$file" ]; then
                 basename=$(basename "$file" .md)
+                echo "🔍 Debug: Converting $file to public/fpga/${basename}.html"
+                echo "🔍 Debug: Footer path check: $(ls -la ../vyges-footer.html 2>/dev/null || echo 'Footer not found at ../vyges-footer.html')"
                 pandoc "$file" -o "public/fpga/${basename}.html" --css=../report-style.css --standalone --metadata title="Vyges Full Adder IP - ${basename}" --include-after-body=../vyges-footer.html
                 echo "✅ Converted $file to HTML"
               fi
