@@ -12,6 +12,18 @@
 SIM ?= icarus
 TOPLEVEL = tb_full_adder
 
+# OS detection for Verilator paths
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    # macOS with Homebrew
+    VERILATOR_INCLUDE = /opt/homebrew/Cellar/verilator/5.038/share/verilator/include
+    VERILATOR_VLTSTD = /opt/homebrew/Cellar/verilator/5.038/share/verilator/include/vltstd
+else
+    # Linux (Ubuntu/Debian)
+    VERILATOR_INCLUDE = /usr/share/verilator/include
+    VERILATOR_VLTSTD = /usr/share/verilator/include/vltstd
+endif
+
 # Source files
 RTL_SOURCES = ../../rtl/full_adder.v ../../rtl/full_adder_simple.v ../../rtl/full_adder_half_adder.v
 TB_SOURCES = tb_full_adder.v tb_full_adder_simple.v tb_full_adder_half_adder.v
@@ -32,8 +44,8 @@ else ifeq ($(SIM),verilator)
     VLOG_FLAGS += -I../../rtl
     SIM_EXEC = verilator_sim
     COMPILE = $(VLOG) $(VLOG_FLAGS) $(RTL_SOURCES) $(TB_SOURCES) && \
-              c++ -I. -Iobj_dir -I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include \
-              -I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include/vltstd \
+              c++ -I. -Iobj_dir -I$(VERILATOR_INCLUDE) \
+              -I$(VERILATOR_VLTSTD) \
               -std=gnu++20 verilator_wrapper.cpp obj_dir/libVtb_full_adder.a \
               obj_dir/libverilated.a -o $(SIM_EXEC)
     RUN = ./$(SIM_EXEC)
@@ -90,8 +102,8 @@ test_simple:
 	@echo "Testing Simple XOR/AND Implementation..."
 ifeq ($(SIM),verilator)
 	verilator --cc --build --trace --top-module tb_full_adder_simple --timing -I../../rtl ../../rtl/full_adder_simple.v tb_full_adder_simple.v && \
-	c++ -I. -Iobj_dir -I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include \
-	-I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include/vltstd \
+	c++ -I. -Iobj_dir -I$(VERILATOR_INCLUDE) \
+	-I$(VERILATOR_VLTSTD) \
 	-std=gnu++20 verilator_wrapper_simple.cpp obj_dir/libVtb_full_adder_simple.a \
 	obj_dir/libverilated.a -o verilator_simple_sim && \
 	./verilator_simple_sim
@@ -105,8 +117,8 @@ test_half_adder:
 	@echo "Testing Half Adder Modular Implementation..."
 ifeq ($(SIM),verilator)
 	verilator --cc --build --trace --top-module tb_full_adder_half_adder --timing -I../../rtl ../../rtl/full_adder_half_adder.v tb_full_adder_half_adder.v && \
-	c++ -I. -Iobj_dir -I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include \
-	-I/opt/homebrew/Cellar/verilator/5.038/share/verilator/include/vltstd \
+	c++ -I. -Iobj_dir -I$(VERILATOR_INCLUDE) \
+	-I$(VERILATOR_VLTSTD) \
 	-std=gnu++20 verilator_wrapper_half_adder.cpp obj_dir/libVtb_full_adder_half_adder.a \
 	obj_dir/libverilated.a -o verilator_half_adder_sim && \
 	./verilator_half_adder_sim
@@ -152,6 +164,14 @@ clean:
 	rm -rf *.d
 	rm -rf simv.out
 
+# Debug target
+debug:
+	@echo "OS Detection Debug Info:"
+	@echo "  UNAME_S: $(UNAME_S)"
+	@echo "  VERILATOR_INCLUDE: $(VERILATOR_INCLUDE)"
+	@echo "  VERILATOR_VLTSTD: $(VERILATOR_VLTSTD)"
+	@echo "  SIM: $(SIM)"
+
 # Help target
 help:
 	@echo "Full Adder SystemVerilog Testbench Makefile"
@@ -170,6 +190,7 @@ help:
 	@echo "  test_all_implementations - Test all three implementations"
 	@echo "  waves                  - View waveforms"
 	@echo "  clean                  - Clean build artifacts"
+	@echo "  debug                  - Show OS detection and path info"
 	@echo "  help                   - Show this help message"
 	@echo ""
 	@echo "Available simulators (set SIM=<simulator>):"
@@ -183,4 +204,4 @@ help:
 	@echo "  make test_all SIM=verilator"
 	@echo "  make waves SIM=questa"
 
-.PHONY: all compile run test_basic test_random test_all waves clean help 
+.PHONY: all compile run test_basic test_random test_all waves clean debug help 
