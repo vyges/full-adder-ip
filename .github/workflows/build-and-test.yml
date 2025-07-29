@@ -488,6 +488,17 @@ jobs:
             cp test_harness_report.md public/
             echo "✅ Test harness report generated and copied to public directory"
           
+          # Generate GitHub Pages index with gates and die size
+          echo "🌐 Generating GitHub Pages index with gates and die size..."
+          
+          # Run the GitHub Pages generation script
+          if [ -f "scripts/generate_github_pages.py" ]; then
+            python3 scripts/generate_github_pages.py
+            echo "✅ GitHub Pages index generated with gates and die size cards"
+          else
+            echo "⚠️ GitHub Pages generation script not found"
+          fi
+          
           # Convert markdown reports to HTML with styling
           echo "🔄 Converting markdown reports to HTML..."
           
