@@ -6,11 +6,16 @@
   "description": "A configurable full adder IP with three implementation approaches: simple XOR/AND gates, modular half adder design, and carry lookahead structure for optimal performance and scalability. Includes comprehensive verification with SystemVerilog and Cocotb testbenches.",
   "license": "Apache-2.0",
   "template": "vyges-ip-template@1.0.0",
-  "target": ["asic", "fpga"],
-  "design_type": ["digital"],
+  "target": [
+    "asic",
+    "fpga"
+  ],
+  "design_type": [
+    "digital"
+  ],
   "maturity": "production",
-  "created": "2025-07-17T08:18:59Z",
-  "updated": "2025-07-17T08:18:59Z",
+  "created": "2025-08-15T00:00:00Z",
+  "updated": "2025-08-15T00:00:00Z",
   "source": {
     "type": "git",
     "url": "https://github.com/vyges/full-adder-ip",
@@ -36,14 +41,57 @@
     {
       "type": "combinational",
       "direction": "bidirectional",
+      "protocol": "Combinational",
       "signals": [
-        { "name": "clk_i", "direction": "input", "type": "clock", "width": 1, "description": "Clock input"},
-        { "name": "reset_n_i", "direction": "input", "type": "reset", "width": 1, "description": "Active low reset" },
-        { "name": "a_i", "direction": "input", "type": "data", "width": 1, "description": "First input bit" },
-        { "name": "b_i", "direction": "input", "type": "data", "width": 1, "description": "Second input bit" },
-        { "name": "cin_i", "direction": "input", "type": "data", "width": 1, "description": "Carry input from previous stage" },
-        { "name": "sum_o", "direction": "output", "type": "data", "width": 1, "description": "Sum output" },
-        { "name": "cout_o", "direction": "output", "type": "data", "width": 1, "description": "Carry output to next stage" }
+        {
+          "name": "clk_i",
+          "direction": "input",
+          "type": "clock",
+          "width": 1,
+          "description": "Clock input"
+        },
+        {
+          "name": "reset_n_i",
+          "direction": "input",
+          "type": "reset",
+          "width": 1,
+          "description": "Active low reset"
+        },
+        {
+          "name": "a_i",
+          "direction": "input",
+          "type": "data",
+          "width": 1,
+          "description": "First input bit"
+        },
+        {
+          "name": "b_i",
+          "direction": "input",
+          "type": "data",
+          "width": 1,
+          "description": "Second input bit"
+        },
+        {
+          "name": "cin_i",
+          "direction": "input",
+          "type": "data",
+          "width": 1,
+          "description": "Carry input from previous stage"
+        },
+        {
+          "name": "sum_o",
+          "direction": "output",
+          "type": "data",
+          "width": 1,
+          "description": "Sum output"
+        },
+        {
+          "name": "cout_o",
+          "direction": "output",
+          "type": "data",
+          "width": 1,
+          "description": "Carry output to next stage"
+        }
       ]
     }
   ],
@@ -53,7 +101,11 @@
       "type": "string",
       "default": "carry_lookahead",
       "description": "Implementation approach for the full adder",
-      "enum": ["simple", "half_adder", "carry_lookahead"],
+      "enum": [
+        "simple",
+        "half_adder",
+        "carry_lookahead"
+      ],
       "required": false
     },
     {
@@ -61,15 +113,34 @@
       "type": "int",
       "default": 100,
       "description": "Typical gate delay for timing analysis",
-      "range": { "min": 50, "max": 500 },
+      "range": {
+        "min": 50,
+        "max": 500
+      },
       "units": "picoseconds",
       "required": false
     }
   ],
+  "categories": {
+    "primary": "arithmetic",
+    "secondary": ["basic_logic", "digital"],
+    "tags": ["full_adder", "arithmetic", "carry_lookahead", "half_adder", "cocotb", "verification"]
+  },
+  "community": {
+    "issues": "https://github.com/vyges/full-adder-ip/issues",
+    "contributions": "https://github.com/vyges/full-adder-ip/pulls",
+    "chat": "https://github.com/vyges/full-adder-ip/discussions"
+  },
   "test": {
     "coverage": true,
-    "testbenches": ["systemverilog", "cocotb"],
-    "simulators": ["verilator", "iverilog"],
+    "testbenches": [
+      "systemverilog",
+      "cocotb"
+    ],
+    "simulators": [
+      "verilator",
+      "iverilog"
+    ],
     "status": "passing",
     "synthesis_verification": true,
     "test_cases": [
@@ -89,25 +160,33 @@
         "name": "random_input_testing",
         "description": "Random input combinations for stress testing",
         "status": "passing",
-        "testbench": ["cocotb"]
+        "testbench": [
+          "cocotb"
+        ]
       },
       {
         "name": "edge_case_testing",
         "description": "Rapid input changes and edge cases",
         "status": "passing",
-        "testbench": ["cocotb"]
+        "testbench": [
+          "cocotb"
+        ]
       },
       {
         "name": "reset_functionality",
         "description": "Reset behavior verification",
         "status": "passing",
-        "testbench": ["cocotb"]
+        "testbench": [
+          "cocotb"
+        ]
       },
       {
         "name": "coverage_scenarios",
         "description": "Comprehensive coverage scenarios",
         "status": "passing",
-        "testbench": ["cocotb"]
+        "testbench": [
+          "cocotb"
+        ]
       },
       {
         "name": "synthesis_verification",
@@ -120,15 +199,37 @@
       "systemverilog": {
         "location": "tb/sv_tb/",
         "description": "Simple, direct verification approach",
-        "features": ["Direct signal manipulation", "Manual test case generation", "Basic error reporting"],
-        "simulators": ["icarus", "verilator"]
+        "features": [
+          "Direct signal manipulation",
+          "Manual test case generation",
+          "Basic error reporting"
+        ],
+        "simulators": [
+          "icarus",
+          "verilator"
+        ]
       },
       "cocotb": {
         "location": "tb/cocotb/",
         "description": "Python-based verification with async/await support",
-        "features": ["Python-based test development", "Cross-simulator compatibility", "Easy integration with Python libraries", "Async/await support"],
-        "test_scenarios": ["Basic functionality", "Random input testing", "Edge cases", "Reset functionality", "Timing analysis", "Coverage scenarios"],
-        "simulators": ["icarus", "verilator"]
+        "features": [
+          "Python-based test development",
+          "Cross-simulator compatibility",
+          "Easy integration with Python libraries",
+          "Async/await support"
+        ],
+        "test_scenarios": [
+          "Basic functionality",
+          "Random input testing",
+          "Edge cases",
+          "Reset functionality",
+          "Timing analysis",
+          "Coverage scenarios"
+        ],
+        "simulators": [
+          "icarus",
+          "verilator"
+        ]
       }
     }
   },
@@ -145,11 +246,18 @@
   },
   "asic": {
     "flavor": "digital",
-    "pdks": ["sky130B", "gf180mcu"],
+    "pdks": [
+      "sky130B",
+      "gf180mcu"
+    ],
     "synthesis_tool": "yosys",
     "clock_freq_mhz": 500,
-    "constraints": ["constraints.sdc"],
-    "tools": ["yosys"],
+    "constraints": [
+      "constraints.sdc"
+    ],
+    "tools": [
+      "yosys"
+    ],
     "area_um2": 50,
     "power_mw": 0.1,
     "gate_analysis": {
@@ -191,7 +299,13 @@
       "synthesis_flow": {
         "tool": "yosys",
         "technology_mapping": "ABC",
-        "standard_cells": ["AND", "OR", "XOR", "XNOR", "ANDNOT"],
+        "standard_cells": [
+          "AND",
+          "OR",
+          "XOR",
+          "XNOR",
+          "ANDNOT"
+        ],
         "analysis_script": "flow/yosys/gate_analysis.py"
       }
     }
@@ -200,7 +314,9 @@
     "toolchain": "yosys",
     "board": "arty-a7-35",
     "cfu_playground_compatible": true,
-    "constraints": ["constraints.xdc"],
+    "constraints": [
+      "constraints.xdc"
+    ],
     "lut_count": 3,
     "ff_count": 0
   },
@@ -225,32 +341,49 @@
   },
   "automation": {
     "automation_level": "enhanced",
-    "minimal_required": ["name", "version", "license", "interfaces", "template", "target", "design_type", "maturity", "description", "source", "asic", "fpga", "test", "flows"],
-    "recommended_for_automation": ["parameters", "dependencies", "toolRequirements", "performance", "reliability", "packaging", "community"],
+    "minimal_required": [
+      "name",
+      "version",
+      "license",
+      "interfaces",
+      "template",
+      "target",
+      "design_type",
+      "maturity",
+      "description",
+      "source",
+      "asic",
+      "fpga",
+      "test",
+      "flows"
+    ],
+    "recommended_for_automation": [
+      "parameters",
+      "dependencies",
+      "toolRequirements",
+      "performance",
+      "reliability",
+      "packaging",
+      "community"
+    ],
     "blocking_issues": []
   },
   "meta": {
     "template": {
       "generator": "vyges-cli",
-      "init_tool": "vyges-cli", 
+      "init_tool": "vyges-cli",
       "template_version": "1.0.0",
-      "generated_at": "2025-07-17T08:18:59Z"
+      "generated_at": "2025-08-15T00:00:00Z"
     },
     "generated_by": "vyges-cli",
     "schema": {
       "version": "1.0.0",
-      "compatible_versions": ["1.0.0", "1.1.0"],
+      "compatible_versions": [
+        "1.0.0",
+        "1.1.0"
+      ],
       "generated_with": "vyges-cli"
     }
-  },
-  "categories": ["arithmetic", "basic_logic"],
-  "tags": ["full_adder", "arithmetic", "carry_lookahead", "half_adder", "cocotb", "verification"],
-  "keywords": ["full_adder", "arithmetic", "carry_propagation", "digital_logic", "adder", "cocotb", "systemverilog", "verification", "gate_analysis", "synthesis"],
-  "performance": {
-    "max_frequency_mhz": 500,
-    "propagation_delay_ps": 300,
-    "setup_time_ps": 50,
-    "hold_time_ps": 20
   },
   "reliability": {
     "fault_tolerance": "none",
@@ -258,8 +391,15 @@
     "test_coverage": 100
   },
   "verification": {
-    "methodologies": ["systemverilog", "cocotb"],
-    "coverage_types": ["functional", "code", "toggle"],
+    "methodologies": [
+      "systemverilog",
+      "cocotb"
+    ],
+    "coverage_types": [
+      "functional",
+      "code",
+      "toggle"
+    ],
     "assertions": true,
     "formal_verification": false,
     "waveform_generation": true,
@@ -267,4 +407,4 @@
     "synthesis_verification": true,
     "gate_level_analysis": true
   }
-} 
+}
